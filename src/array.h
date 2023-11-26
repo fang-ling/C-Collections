@@ -46,4 +46,13 @@ int array_init(struct Array* array, int element_size);
 /* Destroys an array. */
 void array_deinit(struct Array* array);
 
+/* Returns the element at the specified position. */
+int array_get(struct Array* array, int index, void* element);
+
+/* Replaces the element at the specified position. */
+int array_set(struct Array* array, int index, void* element);
+
+/* Adds a new element at the end of the array. */
+int array_append(struct Array* array, void* element);
+
 #endif /* array_h */

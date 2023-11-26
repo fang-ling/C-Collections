@@ -20,8 +20,18 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define var __auto_type
+
+/*
+ * Error code of Array:
+ * 0: NO ERROR
+ * 1: due to malloc, check `errno`
+ * 2: Array index is out of range
+ * 3: Negative Array index is out of range
+ * 5: due to realloc, check `errno`
+ */
 
 struct Array {
   void* _storage;
@@ -52,11 +62,8 @@ struct Array {
   bool is_empty;
 };
 
-/*
- * Error code of function `(_)array_init`:
- * 0: NO ERROR
- * 1: due to malloc, check `errno`.
- */
+/* MARK: - Creating and Destroying an Array */
+
 static
 int _array_init(struct Array* array, unsigned int count, int element_size) {
   /* Rounding up to next power of 2 */
@@ -96,6 +103,70 @@ void array_deinit(struct Array* array) {
   (*array).element_size = 0;
   (*array).capacity = 0;
   (*array).is_empty = true;
+}
+
+/* MARK: - Accessing Elements */
+
+/* Check that the specified `index` is valid, i.e. `0 ≤ index < count`. */
+static int _check_index(struct Array* array, int index) {
+  if (index >= (*array).count) {
+    return 2;
+  } else if (index < 0) {
+    return 3;
+  }
+  return 0;
+}
+
+/* Returns the element at the specified position. */
+int array_get(struct Array* array, int index, void* element) {
+  var err = _check_index(array, index);
+  if (err != 0) {
+    return err;
+  }
+  memcpy(
+    element,
+    (*array)._storage + (*array).element_size * index,
+    (*array).element_size
+  );
+  return err;
+}
+
+/* Replaces the element at the specified position. */
+int array_set(struct Array* array, int index, void* element) {
+  var err = _check_index(array, index);
+  if (err != 0) {
+    return err;
+  }
+  memcpy(
+    (*array)._storage + (*array).element_size * index,
+    element,
+    (*array).element_size
+  );
+  return err;
+}
+
+/* MARK: - Adding Elements */
+
+/* Adds a new element at the end of the array. */
+int array_append(struct Array* array, void* element) {
+  var q = 2; /* multiple factor = 2 */
+  
+  if ((*array).capacity == 0) {
+    (*array)._storage = realloc((*array)._storage, 1 * (*array).element_size);
+    (*array).capacity = 1;
+  }
+  if ((*array).count == (*array).capacity) {
+    (*array).capacity *= q;
+    var new_size = (*array).capacity * (*array).element_size;
+    (*array)._storage = realloc((*array)._storage, new_size);
+    if ((*array)._storage == NULL) {
+      return 5;
+    }
+  }
+  (*array).count += 1;
+  array_set(array, (*array).count - 1, element);
+  
+  return 0;
 }
 
 /*===----------------------------------------------------------------------===*/
