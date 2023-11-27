@@ -4,14 +4,14 @@
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling                                   \ \ ,__\  \ \ \        */
 /* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: November 26, 2023                               \ \_\/\_\/\____\/\_\ */
+/* Date: November 27, 2023                               \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
 /*
  * This source file is part of the C Collections open source project
  *
- * Copyright (c) 2023 Fang Ling.
+ * Copyright (c) 2023 Fang Ling
  * Licensed under Apache License v2.0
  *
  * See https://github.com/fang-ling/C-Collections/blob/main/LICENSE for license
@@ -164,7 +164,21 @@ int array_append(struct Array* array, void* element) {
     }
   }
   (*array).count += 1;
+  (*array).is_empty = false;
   array_set(array, (*array).count - 1, element);
+  
+  return 0;
+}
+
+/* MARK: - Removing Elements */
+
+/* Removes all the elements. */
+int array_remove_all(struct Array* array) {
+  free((*array)._storage);
+  (*array)._storage = NULL;
+  (*array).count = 0;
+  (*array).capacity = 0;
+  (*array).is_empty = true;
   
   return 0;
 }

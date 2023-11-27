@@ -1,7 +1,7 @@
 /*
  * This source file is part of the C Collections open source project
  *
- * Copyright (c) 2023 Fang Ling.
+ * Copyright (c) 2023 Fang Ling
  * Licensed under Apache License v2.0
  *
  * See https://github.com/fang-ling/C-Collections/blob/main/LICENSE for license
@@ -34,6 +34,61 @@
   array_deinit(&array);
 }
 
+- (void) test_array_is_empty {
+  struct Array array;
+  array_init(&array, sizeof(int));
+  XCTAssertTrue(array.is_empty);
+
+  var delta = 19358;
+  array_append(&array, &delta);
+  XCTAssertFalse(array.is_empty);
+
+//  array_remove_lastn(array);
+//  expect_true(array -> is_empty);
+
+//     array_insert(array, 0, &delta);
+//     expect_false(array -> is_empty);
+//
+//     array_remove_firstn(array);
+//     expect_true(array -> is_empty);
+//
+//     array_deinit(array);
+//
+//     array = array_init2(sizeof(Int), delta);
+//     expect_false(array -> is_empty);
+//
+//     array_deinit(array);
+//
+//     array = array_init3(sizeof(Int), &delta, delta);
+//     expect_false(array -> is_empty);
+//
+  array_deinit(&array);
+}
+
+- (void)test_array_count {
+  struct Array array;
+  array_init(&array, sizeof(int));
+  
+  XCTAssertEqual(array.count, 0);
+  
+  var delta = 19358;
+  array_append(&array, &delta);
+  XCTAssertEqual(array.count, 1);
+  //     array_insert(array, 0, &delta);
+  //     delta = 2ll;
+  //     expect_equal(&delta, &array -> count, int_equal);
+  //
+  //     free(array_remove_first(array));
+  //     delta = 1ll;
+  //     expect_equal(&delta, &array -> count, int_equal);
+  //
+  //     array_remove_lastn(array);
+  //     delta = 0ll;
+  //     expect_equal(&delta, &array -> count, int_equal);
+  //
+  array_deinit(&array);
+}
+
 - (void)test_array_get {
   struct Array array;
   array_init(&array, sizeof(int));
@@ -51,80 +106,32 @@
   array_deinit(&array);
 }
 
+- (void)test_array_set {
+  struct Array array;
+  array_init(&array, sizeof(int));
+  
+  for (var i = 0; i < 5; i += 1) {
+    array_append(&array, &i);
+  }
+  XCTAssertEqual(array.capacity, 8);
+  
+  int input[] = {19358, 12333, 19348, 19306, 19306};
+  
+  for (var i = 0; i < 5; i += 1) {
+    array_set(&array, i, &input[i]);
+  }
+  
+  var delta = 0;
+  for (var i = 0; i < 5; i += 1) {
+    array_get(&array, i, &delta);
+    XCTAssertEqual(input[i], delta);
+  }
+  
+  array_deinit(&array);
+}
+
 @end
 
-
-// static Bool test_is_empty(void) {
-//     var array = array_init(sizeof(Int));
-//     expect_true(array -> is_empty);
-//
-//     var delta = 19358ll;
-//     array_append(array, &delta);
-//     expect_false(array -> is_empty);
-//
-//     array_remove_lastn(array);
-//     expect_true(array -> is_empty);
-//
-//     array_insert(array, 0, &delta);
-//     expect_false(array -> is_empty);
-//
-//     array_remove_firstn(array);
-//     expect_true(array -> is_empty);
-//
-//     array_deinit(array);
-//
-//     array = array_init2(sizeof(Int), delta);
-//     expect_false(array -> is_empty);
-//
-//     array_deinit(array);
-//
-//     array = array_init3(sizeof(Int), &delta, delta);
-//     expect_false(array -> is_empty);
-//
-//     array_deinit(array);
-//     return true;
-// }
-//
-// static Bool test_count(void) {
-//     var array = array_init(sizeof(Int));
-//     var delta = 0ll;
-//     expect_equal(&delta, &array -> count, int_equal);
-//
-//     delta = 19358ll;
-//     array_append(array, &delta);
-//     delta = 1ll;
-//     expect_equal(&delta, &array -> count, int_equal);
-//     array_insert(array, 0, &delta);
-//     delta = 2ll;
-//     expect_equal(&delta, &array -> count, int_equal);
-//
-//     free(array_remove_first(array));
-//     delta = 1ll;
-//     expect_equal(&delta, &array -> count, int_equal);
-//
-//     array_remove_lastn(array);
-//     delta = 0ll;
-//     expect_equal(&delta, &array -> count, int_equal);
-//
-//     array_deinit(array);
-//     return true;
-// }
-//
-// static Bool test_set(void) {
-//     var array = array_init2(sizeof(Int), 5);
-//     Int input[] = {19358ll, 12333ll, 19348ll, 19306ll, 19306ll};
-//
-//     for (var i = 0; i < 5; i += 1) {
-//         array_set(array, i, &input[i]);
-//     }
-//
-//     for (var i = 0; i < 5; i += 1) {
-//         expect_equal(&input[i], array_get(array, i), int_equal);
-//     }
-//
-//     array_deinit(array);
-//     return true;
-// }
 //
 // static Bool test_first(void) {
 //     var array = array_init(sizeof(Int));
