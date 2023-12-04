@@ -131,6 +131,25 @@
   array_deinit(&array);
 }
 
+- (void)test_array_sort {
+  struct Array array;
+  array_init(&array, sizeof(int));
+  struct Array result;
+  array_init(&result, sizeof(int));
+
+  for (var i = 0; i < 19358; i += 1) {
+    var delta = arc4random();
+    array_append(&array, &delta);
+    array_append(&result, &delta);
+  }
+  array_sort(&array, compare);
+  qsort(result._storage, 19358, sizeof(int), compare);
+  XCTAssertEqual(
+    0, 
+    memcmp(result._storage, array._storage, 19358 * sizeof(int))
+  );
+}
+
 // MARK: - sort
 
 int compare(const void* a, const void* b) {

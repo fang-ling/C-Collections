@@ -55,4 +55,10 @@ int array_set(struct Array* array, int index, void* element);
 /* Adds a new element at the end of the array. */
 int array_append(struct Array* array, void* element);
 
+/* Removes all the elements. */
+int array_remove_all(struct Array* array);
+
+/* Sorts the collection in place. */
+void array_sort(struct Array* array, int (*compare)(const void*, const void*));
+
 #endif /* array_h */

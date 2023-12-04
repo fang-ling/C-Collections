@@ -3,8 +3,8 @@
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling                                   \ \ ,__\  \ \ \        */
-/* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: November 27, 2023                               \ \_\/\_\/\____\/\_\ */
+/* Version: 1.1                                         \ \ \_/__ \_\ \_  __  */
+/* Date: December 4, 2023                                \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "sort.h"
 
 #define var __auto_type
 
@@ -181,6 +183,16 @@ int array_remove_all(struct Array* array) {
   (*array).is_empty = true;
   
   return 0;
+}
+
+/* MARK: - Reordering an Array’s Elements */
+
+/* Sorts the collection in place. */
+void array_sort(struct Array* array, int (*compare)(const void*, const void*)) {
+  if ((*array).count <= 1) {
+    return;
+  }
+  sort((*array)._storage, (*array).count, (*array).element_size, compare);
 }
 
 /*===----------------------------------------------------------------------===*/
