@@ -11,6 +11,7 @@
 #import <XCTest/XCTest.h>
 
 #import "array.h"
+#import "sort.h"
 
 #define var __auto_type
 
@@ -128,6 +129,27 @@
   }
   
   array_deinit(&array);
+}
+
+// MARK: - sort
+
+int compare(const void* a, const void* b) {
+  if (*(int*)a > *(int*)b) {
+    return 1;
+  } else if (*(int*)a < *(int*)b) {
+    return -1;
+  }
+  return 0;
+}
+
+- (void)test_sort {
+  int array[] = {/*19342, 19358, 3, 2, -1, 20, 7*/19358, 19342, 20, 7, 3, 2, -1};
+  sort(array, 7, sizeof(int), compare);
+
+  int result[] = {-1, 2, 3, 7, 20, 19342, 19358};
+  for (var i = 0; i < 7; i += 1) {
+    XCTAssertEqual(array[i], result[i]);
+  }
 }
 
 @end
