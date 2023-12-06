@@ -2,7 +2,7 @@
 /*                                                        ___   ___           */
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
-/* Author: Fang Ling                                   \ \ ,__\  \ \ \        */
+/* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
 /* Version: 1.1                                         \ \ \_/__ \_\ \_  __  */
 /* Date: December 4, 2023                                \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
