@@ -148,6 +148,39 @@
     0, 
     memcmp(result._storage, array._storage, 19358 * sizeof(int))
   );
+
+  array_deinit(&array);
+}
+
+bool where_1(const void* elem) {
+  if (*(int*)elem < 59) {
+    return true;
+  }
+  return false;
+}
+
+bool where_2(const void* elem) {
+  if (*(int*)elem == 12333) {
+    return true;
+  }
+  return false;
+}
+
+- (void)test_array_contains {
+  struct Array array;
+  array_init(&array, sizeof(int));
+
+  XCTAssertFalse(array_contains(&array, where_1));
+
+  int expenses[] = {19358, 12333, 19348, 19306, 19306, 58};
+  for (var i = 0; i < 6; i += 1) {
+    array_append(&array, &expenses[i]);
+  }
+  XCTAssertTrue(array_contains(&array, where_1));
+
+  XCTAssertTrue(array_contains(&array, where_2));
+
+  array_deinit(&array);
 }
 
 // MARK: - sort

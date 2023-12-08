@@ -3,8 +3,8 @@
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.1                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 4, 2023                                \ \_\/\_\/\____\/\_\ */
+/* Version: 1.2                                         \ \ \_/__ \_\ \_  __  */
+/* Date: December 8, 2023                                \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -183,6 +183,54 @@ int array_remove_all(struct Array* array) {
   (*array).is_empty = true;
   
   return 0;
+}
+
+/* MARK: - Finding Elements */
+
+/*
+ * Returns a Boolean value indicating whether the sequence contains an element
+ * that satisfies the given predicate.
+ *
+ * Parameters:
+ *   where: A function pointer that takes an element of the sequence as its
+ *          argument and returns a Boolean value that indicates whether the
+ *          passed element represents a match.
+ *
+ * Discussion:
+ *   This example shows how you can check an array for an expense less than $59.
+ *
+ *   ```
+ *   bool where(const void* elem) {
+ *     if (*(int*)elem < 59) {
+ *       return true;
+ *     }
+ *     return false;
+ *   }
+ *
+ *   struct Array array;
+ *   array_init(&array, sizeof(int));
+ *
+ *   int expenses[] = {19358, 12333, 19348, 19306, 19306, 58};
+ *   for (var i = 0; i < 6; i += 1) {
+ *     array_append(&array, &expenses[i]);
+ *   }
+ *   array_contains(&array, where); // Returnes true
+ *
+ *   array_deinit(&array);
+ *   ```
+ */
+bool array_contains(struct Array* array, bool (*where)(const void*)) {
+  var buf = malloc((*array).element_size);
+  var i = 0;
+  for (i = 0; i < (*array).count; i += 1) {
+    array_get(array, i, buf);
+    if (where(buf)) {
+      free(buf);
+      return true;
+    }
+  }
+  free(buf);
+  return false;
 }
 
 /* MARK: - Reordering an Array’s Elements */

@@ -58,6 +58,40 @@ int array_append(struct Array* array, void* element);
 /* Removes all the elements. */
 int array_remove_all(struct Array* array);
 
+/*
+ * Returns a Boolean value indicating whether the sequence contains an element
+ * that satisfies the given predicate.
+ *
+ * Parameters:
+ *   where: A function pointer that takes an element of the sequence as its
+ *          argument and returns a Boolean value that indicates whether the
+ *          passed element represents a match.
+ *
+ * Discussion:
+ *   This example shows how you can check an array for an expense less than $59.
+ *
+ *   ```
+ *   bool where(const void* elem) {
+ *     if (*(int*)elem < 59) {
+ *       return true;
+ *     }
+ *     return false;
+ *   }
+ *
+ *   struct Array array;
+ *   array_init(&array, sizeof(int));
+ *
+ *   int expenses[] = {19358, 12333, 19348, 19306, 19306, 58};
+ *   for (var i = 0; i < 6; i += 1) {
+ *     array_append(&array, &expenses[i]);
+ *   }
+ *   array_contains(&array, where); // Returnes true
+ *
+ *   array_deinit(&array);
+ *   ```
+ */
+bool array_contains(struct Array* array, bool (*where)(const void*));
+
 /* Sorts the collection in place. */
 void array_sort(struct Array* array, int (*compare)(const void*, const void*));
 
