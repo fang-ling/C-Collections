@@ -233,6 +233,56 @@ bool array_contains(struct Array* array, bool (*where)(const void*)) {
   return false;
 }
 
+/*
+ * Returns the first index in which an element of the collection satisfies the
+ * given predicate.
+ *
+ * Parameters:
+ *   where: A function pointer that takes an element of the sequence as its
+ *          argument and returns a Boolean value that indicates whether the
+ *          passed element represents a match.
+ *
+ * Return Value:
+ *  The index of the first element for which `where` returns true. If no
+ *  elements in the collection satisfy the given predicate, returns -1.
+ *
+ * Disscussion:
+ *   Here’s an example that finds a number that ends with the digit `3`:
+ *
+ *   ```
+ *   bool where(const void* elem) {
+ *     if (*(int*)elem % 10 == 3) {
+ *       return true;
+ *     }
+ *     return false;
+ *   }
+ *
+ *   struct Array array;
+ *   array_init(&array, sizeof(int));
+ *
+ *   int input[] = {19358, 12333, 19348, 19306, 19306, 58};
+ *   for (var i = 0; i < 6; i += 1) {
+ *     array_append(&array, &input[i]);
+ *   }
+ *   array_first_index(&array, where_3); // Returns 1
+ *
+ *   array_deinit(&array);
+ *   ```
+ */
+int array_first_index(struct Array* array, bool (*where)(const void*)) {
+  var buf = malloc((*array).element_size);
+  var i = 0;
+  for (i = 0; i < (*array).count; i += 1) {
+    array_get(array, i, buf);
+    if (where(buf)) {
+      free(buf);
+      return i;
+    }
+  }
+  free(buf);
+  return -1;
+}
+
 /* MARK: - Reordering an Array’s Elements */
 
 /* Sorts the collection in place. */
