@@ -11,5 +11,5 @@ Objective-C codes are only for Xcode unit tests (`xctest`).
 
 ## Contents
 
-- `Array` v1.1 An ordered, random-access collection.
+- `Array` v1.2 An ordered, random-access collection.
 - `sort()` v1.0 Randomized quicksort with insertion sort on small arrays and optimized for sorted and reverse-sorted arrays.
