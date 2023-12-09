@@ -55,6 +55,9 @@ int array_set(struct Array* array, int index, void* element);
 /* Adds a new element at the end of the array. */
 int array_append(struct Array* array, void* element);
 
+/* Removes the last element of the collection. */
+int array_remove_last(struct Array* array);
+
 /* Removes all the elements. */
 int array_remove_all(struct Array* array);
 

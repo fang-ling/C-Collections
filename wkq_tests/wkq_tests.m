@@ -205,6 +205,44 @@ bool where_3(const void* elem) {
   array_deinit(&array);
 }
 
+- (void)test_remove_last {
+  int input[] = {12333, 19358, 19348, 12321, 19348, 19333};
+
+  struct Array array;
+  array_init(&array, sizeof(int));
+  /* expect fatal error */
+  XCTAssertEqual(array_remove_last(&array), 6);
+
+  for (var i = 0; i < 6; i += 1) {
+     array_append(&array, &input[i]);
+  }
+  /* remove last (19333) */
+  array_remove_last(&array);
+  var delta = 0;
+  array_get(&array, array.count - 1, &delta);
+  XCTAssertEqual(delta, 19348);
+
+  /* remove last (19348) */
+  array_remove_last(&array);
+  array_get(&array, array.count - 1, &delta);
+  XCTAssertEqual(delta, 12321);
+
+  for (var i = 0; i < 6; i += 1) {
+     array_append(&array, &input[i]);
+  }
+
+  /* remove the rest */
+  while (!array.is_empty) {
+     array_remove_last(&array);
+  }
+
+  XCTAssertEqual(array.count, 0);
+  XCTAssertEqual(array.capacity, 1);
+  XCTAssertEqual(array.is_empty, true);
+
+  array_deinit(&array);
+}
+
 // MARK: - sort
 
 int compare(const void* a, const void* b) {
@@ -372,58 +410,6 @@ int compare(const void* a, const void* b) {
 //     return true;
 // }
 //
-// static Bool test_remove(void) {
-//     Int input[] = {12333ll, 19358ll, 19348ll, 12321ll, 19348ll, 19333ll};
-//
-//     var array = array_init(sizeof(Int));
-//     /* expect fatal error */
-//     //array_remove_lastn(array);
-//     //free(array_remove_last(array));
-//     //array_remove_firstn(array);
-//     //free(array_remove_first(array));
-//
-//     for (var i = 0; i < 6; i += 1) {
-//         array_append(array, &input[i]);
-//     }
-//     /* remove 19348 */
-//     var alpha = 19348ll;
-//     var delta = array_remove(array, 2); /* void* */
-//     expect_equal(&alpha, delta, int_equal);
-//     free(delta);
-//     alpha = 5;
-//     expect_equal(&alpha, &array -> count, int_equal);
-//
-//     /* remove first (12333) */
-//     alpha = 12333ll;
-//     delta = array_remove_first(array);
-//     expect_equal(&alpha, delta, int_equal);
-//     free(delta);
-//     alpha = 4;
-//     expect_equal(&alpha, &array -> count, int_equal);
-//
-//     /* remove last (19333) */
-//     alpha = 19333ll;
-//     delta = array_remove_last(array);
-//     expect_equal(&alpha, delta, int_equal);
-//     free(delta);
-//     alpha = 3;
-//     expect_equal(&alpha, &array -> count, int_equal);
-//
-//     /* remove first but not return */
-//     array_remove_firstn(array);
-//     alpha = 2;
-//     expect_equal(&alpha, &array -> count, int_equal);
-//
-//     /* remove the rest */
-//     while (!array -> is_empty) {
-//         array_remove_lastn(array);
-//         alpha -= 1;
-//         expect_equal(&alpha, &array -> count, int_equal);
-//     }
-//
-//     array_deinit(array);
-//     return true;
-// }
 //
 // static Bool test_swap_at(void) {
 //     Int input[]    = {12333ll, 19358ll, 19348ll, 12321ll, 19348ll, 19333ll};

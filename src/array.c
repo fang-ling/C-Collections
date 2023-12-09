@@ -33,6 +33,7 @@
  * 2: Array index is out of range
  * 3: Negative Array index is out of range
  * 5: due to realloc, check `errno`
+ * 6: Can't remove last element from an empty collection
  */
 
 struct Array {
@@ -162,6 +163,7 @@ int array_append(struct Array* array, void* element) {
     var new_size = (*array).capacity * (*array).element_size;
     (*array)._storage = realloc((*array)._storage, new_size);
     if ((*array)._storage == NULL) {
+      /* FIXME: memory leak will happen if realloc failed */
       return 5;
     }
   }
@@ -173,6 +175,31 @@ int array_append(struct Array* array, void* element) {
 }
 
 /* MARK: - Removing Elements */
+
+/* Removes the last element of the collection. */
+int array_remove_last(struct Array* array) {
+  var q1 = 4;
+  var q2 = 2;
+
+  if ((*array).is_empty) {
+    return 6;
+  }
+  (*array).count -= 1;
+  if ((*array).count == 0) {
+    (*array).is_empty = true;
+  }
+  if ((*array).count * q1 <= (*array).capacity) {
+    (*array).capacity /= q2;
+    var new_size = (*array).capacity * (*array).element_size;
+    (*array)._storage = realloc((*array)._storage, new_size);
+    if ((*array)._storage == NULL) {
+      /* FIXME: memory leak will happen if realloc failed */
+      return 5;
+    }
+  }
+
+  return 0;
+}
 
 /* Removes all the elements. */
 int array_remove_all(struct Array* array) {
