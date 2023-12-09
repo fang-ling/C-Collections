@@ -11,6 +11,7 @@
 #import <XCTest/XCTest.h>
 
 #import "array.h"
+#import "deque.h"
 #import "sort.h"
 
 #define var __auto_type
@@ -262,6 +263,65 @@ int compare(const void* a, const void* b) {
   for (var i = 0; i < 7; i += 1) {
     XCTAssertEqual(array[i], result[i]);
   }
+}
+
+// MARK: - deque
+
+- (void)test_deque_adding_elem {
+  struct Deque deque;
+  deque_init(&deque, sizeof(int));
+
+  var delta = 19358;
+  deque_append(&deque, &delta);
+  var result = 0;
+  deque_get(&deque, 0, &result);
+  XCTAssertEqual(result, delta);
+
+  delta = 12333;
+  deque_prepend(&deque, &delta);
+  deque_get(&deque, 0, &result);
+  XCTAssertEqual(result, delta);
+
+  deque_remove_first(&deque);
+  deque_remove_first(&deque);
+
+  /* 0, 1, 2, 3, 4 */
+  for (var i = 0; i < 5; i += 1) {
+    deque_append(&deque, &i);
+  }
+
+  int o[] = {18, 17, 100, 15, 14, 13, 12, 11, 10, 0, 1, 2, 3, 4};
+  for (var i = 10; i < 19; i += 1) {
+    deque_prepend(&deque, &i);
+  }
+
+  delta = 100;
+  deque_set(&deque, 2, &delta);
+
+  for (var i = 0; i < 14; i += 1) {
+    deque_get(&deque, i, &result);
+    XCTAssertEqual(result, o[i]);
+  }
+
+  deque_deinit(&deque);
+}
+
+- (void)test_deque_adding_elem2 {
+  struct Deque deque;
+  deque_init(&deque, sizeof(int));
+
+  for (var i = 0; i < 5; i += 1) {
+    var delta = 0;
+    deque_prepend(&deque, &i);
+    deque_get(&deque, 0, &delta);
+    printf("%d ", delta);
+  }
+
+  for (var i = 0; i < 5; i += 1) {
+
+  }
+
+  deque_deinit(&deque);
 }
 
 @end
