@@ -306,20 +306,130 @@ int compare(const void* a, const void* b) {
   deque_deinit(&deque);
 }
 
-- (void)test_deque_adding_elem2 {
+- (void)test_deque_is_empty {
   struct Deque deque;
   deque_init(&deque, sizeof(int));
 
+  XCTAssertTrue(deque.is_empty);
+
+  var a = 0;
+  deque_append(&deque, &a);
+  XCTAssertFalse(deque.is_empty);
+
+  deque_prepend(&deque, &a);
+  XCTAssertFalse(deque.is_empty);
+
+  deque_remove_last(&deque);
+  XCTAssertFalse(deque.is_empty);
+
+  deque_remove_first(&deque);
+  XCTAssertTrue(deque.is_empty);
+
+  deque_deinit(&deque);
+}
+
+- (void)test_deque_reblance {
+  struct Deque deque;
+  deque_init(&deque, sizeof(int));
+
+  for (var i = 0; i < 128; i += 1) {
+    deque_append(&deque, &i);
+  }
+  XCTAssertEqual(deque._head.count, 0);
+  XCTAssertEqual(deque._tail.count, 128);
+  XCTAssertEqual(deque.count, 128);
+
+  deque_remove_first(&deque); /* Causes reblance */
+  /* half_count = 127 / 2 = 63 */
+  XCTAssertEqual(deque._head.count, 63);
+  XCTAssertEqual(deque._tail.count, 64);
+  XCTAssertEqual(deque.count, 127);
+
+  for (var i = 0; i < 64; i += 1) {
+    deque_remove_last(&deque);
+  }
+  XCTAssertEqual(deque.count, 63);
+  XCTAssertEqual(deque._tail.count, 0);
+  deque_remove_last(&deque); /* Causes reblance */
+  /* half_count = 63 / 2 = 31 */
+  XCTAssertEqual(deque._head.count, 63 - 31);
+  XCTAssertEqual(deque._tail.count, 31 - 1);
+  XCTAssertEqual(deque.count, 62);
+
+  for (var i = 0; i < 62; i += 1) {
+    deque_remove_first(&deque);
+  }
+  XCTAssertEqual(deque.count, 0);
+
+  XCTAssertEqual(deque_remove_last(&deque), 6);
+  XCTAssertEqual(deque_remove_first(&deque), 6);
+
+  var a = 0;
+  deque_append(&deque, &a);
+  deque_append(&deque, &a);
+  deque_remove_first(&deque);
+  XCTAssertEqual(deque.count, 1);
+  XCTAssertEqual(deque._head.count, 0);
+  XCTAssertEqual(deque._tail.count, 1);
+
+  deque_deinit(&deque);
+}
+
+- (void)test_first {
+  struct Deque deque;
+  deque_init(&deque, sizeof(int));
+
+  /* 0, 1, 2, 3, 4 */
   for (var i = 0; i < 5; i += 1) {
-    var delta = 0;
+    deque_append(&deque, &i);
+  }
+  var a = 99;
+  deque_get(&deque, 0, &a);
+  XCTAssertEqual(a, 0);
+
+  /* 7, 6, 5, 0, 1, 2, 3, 4 */
+  for (var i = 5; i < 8; i += 1) {
     deque_prepend(&deque, &i);
-    deque_get(&deque, 0, &delta);
-    printf("%d ", delta);
   }
+  deque_get(&deque, 0, &a);
+  XCTAssertEqual(a, 7);
 
-  for (var i = 0; i < 5; i += 1) {
+  deque_remove_first(&deque); /* 6, 5, 0, 1, 2, 3, 4 */
+  deque_get(&deque, 0, &a);
+  XCTAssertEqual(a, 6);
 
+  deque_remove_first(&deque); /* 5, 0, 1, 2, 3, 4 */
+  deque_get(&deque, 0, &a);
+  XCTAssertEqual(a, 5);
+  for (var i = 0; i < deque.count; i += 1) {
+    deque_get(&deque, i, &a);
+    printf("%d ", a);
   }
+  printf("\n");
+
+  deque_remove_first(&deque); /* 0, 1, 2, 3, 4 */
+  deque_get(&deque, 0, &a);
+  XCTAssertEqual(a, 0);
+  XCTAssertEqual(deque._head.count, 0);
+  XCTAssertEqual(deque._tail.count, 5);
+
+  for (var i = 0; i < deque.count; i += 1) {
+    deque_get(&deque, i, &a);
+    printf("%d ", a);
+  }
+  printf("\n");
+
+  deque_remove_first(&deque); /* 1, 2, 3, 4 */
+  deque_get(&deque, 0, &a);
+  XCTAssertEqual(a, 1);
+  XCTAssertEqual(deque._head.count, 1);
+  XCTAssertEqual(deque._tail.count, 3);
+
+  for (var i = 0; i < deque.count; i += 1) {
+    deque_get(&deque, i, &a);
+    printf("%d ", a);
+  }
+  printf("\n");
 
   deque_deinit(&deque);
 }

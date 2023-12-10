@@ -4,7 +4,7 @@
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
 /* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 9, 2023                                \ \_\/\_\/\____\/\_\ */
+/* Date: December 10, 2023                               \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -159,37 +159,23 @@ int deque_prepend(struct Deque* deque, void* element) {
  * This function assumes that either the head or the tail is empty, but not 
  * both.
  */
-static int _rebalance(struct Array* head, struct Array* tail) {
-  var count = (*head).count + (*tail).count;
+static int _rebalance(struct Array* empty, struct Array* full) {
+  var count = (*empty).count + (*full).count;
   var half_count = count / 2;
   var err = 0;
-  if ((*head).is_empty) {
-    /* TODO: use memcpy */
-    /* copy the first half to head */
-    var i = 0;
-    for (i = 0; i < half_count; i += 1) {
-      err = array_append(head, (*tail)._storage + i * (*tail).element_size);
-    }
-    /* shift the second halt to the front of tail */
-    memmove(
-      (*tail)._storage, 
-      (*tail)._storage + half_count * (*tail).element_size,
-      (count - half_count) * (*tail).element_size
-    );
-  } else {
-    /* TODO: use memcpy */
-    /* copy the first half to tail */
-    var i = 0;
-    for (i = 0; i < half_count; i += 1) {
-      err = array_append(tail, (*head)._storage + i * (*head).element_size);
-    }
-    /* shift the second halt to the front of head */
-    memmove(
-      (*head)._storage,
-      (*head)._storage + half_count * (*head).element_size,
-      (count - half_count) * (*head).element_size
-    );
+  /* TODO: use memcpy */
+  /* copy the first half to empty */
+  var i = 0;
+  for (i = half_count - 1; i >= 0; i -= 1) { /* Important: append backwords */
+    err = array_append(empty, (*full)._storage + i * (*full).element_size);
   }
+  /* shift the second half to the front of full */
+  memmove(
+    (*full)._storage,
+    (*full)._storage + half_count * (*full).element_size,
+    (count - half_count) * (*full).element_size
+  );
+  (*full).count = count - half_count;
   return err;
 }
 
@@ -199,8 +185,13 @@ int deque_remove_last(struct Deque* deque) {
     return 6;
   }
 
+  (*deque).count -= 1;
+  if ((*deque).count == 0) {
+    (*deque).is_empty = true;
+  }
+
   /* Special fix for reblance */
-  if ((*deque).count == 1) { /* either head or tail is empty */
+  if ((*deque).count == 0) { /* either head or tail is empty */
     if ((*deque)._head.is_empty) {
       return array_remove_last(&(*deque)._tail);
     } else {
@@ -208,20 +199,16 @@ int deque_remove_last(struct Deque* deque) {
     }
   }
 
-  (*deque).count -= 1;
-  if ((*deque).count == 0) {
-    (*deque).is_empty = true;
-  }
   var err = 0;
   if ((*deque)._head.is_empty && (*deque)._tail.is_empty) {
     /* never happen */
   } else if (!(*deque)._tail.is_empty) {
     /* Normal case */
-    err = array_remove_last(&(*deque)._tail);
   } else {
     /* Bad case: rebalance needed */
-    _rebalance(&(*deque)._head, &(*deque)._tail);
+    _rebalance(&(*deque)._tail, &(*deque)._head);
   }
+  err = array_remove_last(&(*deque)._tail);
 
   return err;
 }
@@ -232,8 +219,13 @@ int deque_remove_first(struct Deque* deque) {
     return 6;
   }
 
+  (*deque).count -= 1;
+  if ((*deque).count == 0) {
+    (*deque).is_empty = true;
+  }
+
   /* Special fix for reblance */
-  if ((*deque).count == 1) { /* either head or tail is empty */
+  if ((*deque).count == 0) { /* either head or tail is empty */
     if ((*deque)._head.is_empty) {
       return array_remove_last(&(*deque)._tail);
     } else {
@@ -241,20 +233,16 @@ int deque_remove_first(struct Deque* deque) {
     }
   }
 
-  (*deque).count -= 1;
-  if ((*deque).count == 0) {
-    (*deque).is_empty = true;
-  }
   var err = 0;
   if ((*deque)._head.is_empty && (*deque)._tail.is_empty) {
     /* never happen */
   } else if (!(*deque)._head.is_empty) {
     /* Normal case */
-    err = array_remove_last(&(*deque)._head);
   } else {
     /* Bad case: rebalance needed */
     _rebalance(&(*deque)._head, &(*deque)._tail);
   }
+  err = array_remove_last(&(*deque)._head);
 
   return err;
 }
