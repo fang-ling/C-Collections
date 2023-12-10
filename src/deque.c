@@ -39,6 +39,24 @@ struct Deque {
   struct Array _head;
   struct Array _tail;
 
+  /*
+   * Let head.count = h, tail.count = t
+   *
+   *  h                               h-1       0
+   *  +--------+--------+-...-+--------+--------+
+   *  |//tail//|        |-...-|        |\\head\\|
+   *  +--------+--------+-...-+--------+--------+
+   *
+   *  head stores items in reversed order.
+   *
+   *  deque.append() causes tail.append()
+   *  deque.remove_last() causes tail.remove_last()
+   *  deque.prepend() causes head.append()
+   *  deque.remove_first() causes head.remove_last()
+   *
+   *  remove from empty head or tail causes reblance.
+   */
+
   /* The number of elements in the array. */
   int count;
 
