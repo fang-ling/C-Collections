@@ -49,4 +49,7 @@ int deque_remove_last(struct Deque* deque);
 /* Removes the first element of the collection. */
 int deque_remove_first(struct Deque* deque);
 
+/* Removes all the elements. */
+int deque_remove_all(struct Deque* deque);
+
 #endif /* deque_h */

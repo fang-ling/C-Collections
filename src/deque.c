@@ -3,8 +3,8 @@
 /* Deque START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 10, 2023                               \ \_\/\_\/\____\/\_\ */
+/* Version: 1.1                                         \ \ \_/__ \_\ \_  __  */
+/* Date: December 11, 2023                               \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -263,6 +263,16 @@ int deque_remove_first(struct Deque* deque) {
   err = array_remove_last(&(*deque)._head);
 
   return err;
+}
+
+/* Removes all the elements. */
+int deque_remove_all(struct Deque* deque) {
+  (*deque).count = 0;
+  (*deque).is_empty = true;
+  array_remove_all(&(*deque)._head);
+  array_remove_all(&(*deque)._tail);
+
+  return 0;
 }
 
 /*===----------------------------------------------------------------------===*/
