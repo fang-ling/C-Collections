@@ -136,4 +136,14 @@ int array_first_index(struct Array* array, bool (*where)(const void*));
 /* Sorts the collection in place. */
 void array_sort(struct Array* array, int (*compare)(const void*, const void*));
 
+/*
+ * Returns a Boolean value indicating whether two arrays contain the same
+ * elements in the same order.
+ */
+bool array_equal(
+  struct Array* lhs,
+  struct Array* rhs/*,
+  int (*elem_compare)(const void*, const void*)*/
+);
+
 #endif /* array_h */

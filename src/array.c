@@ -3,8 +3,8 @@
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.3                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 9, 2023                                \ \_\/\_\/\____\/\_\ */
+/* Version: 1.4                                         \ \ \_/__ \_\ \_  __  */
+/* Date: December 15, 2023                               \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -318,6 +318,32 @@ void array_sort(struct Array* array, int (*compare)(const void*, const void*)) {
     return;
   }
   sort((*array)._storage, (*array).count, (*array).element_size, compare);
+}
+
+/* MARK: - Comparing Arrays */
+
+/* 
+ * Returns a Boolean value indicating whether two arrays contain the same
+ * elements in the same order.
+ */
+bool array_equal(
+  struct Array* lhs,
+  struct Array* rhs/*,
+  int (*elem_compare)(const void*, const void*)*/
+) {
+  if ((*lhs).count != (*rhs).count) {
+    return false;
+  }
+  if (
+    memcmp(
+      (*lhs)._storage,
+      (*rhs)._storage,
+      (*lhs).count * (*lhs).element_size
+    ) != 0
+  ) {
+    return false;
+  }
+  return true;
 }
 
 /*===----------------------------------------------------------------------===*/

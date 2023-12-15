@@ -244,6 +244,25 @@ bool where_3(const void* elem) {
   array_deinit(&array);
 }
 
+- (void)test_array_equal {
+  struct Array lhs;
+  struct Array rhs;
+  array_init(&lhs, sizeof(int));
+  array_init(&rhs, sizeof(int));
+
+  for (var i = 0; i < 100; i += 1) {
+    array_append(&lhs, &i);
+    array_append(&rhs, &i);
+  }
+  XCTAssertTrue(array_equal(&lhs, &rhs));
+
+  ((int*)lhs._storage)[58] = 19358;
+  XCTAssertFalse(array_equal(&lhs, &rhs));
+
+  array_deinit(&lhs);
+  array_deinit(&rhs);
+}
+
 // MARK: - sort
 
 int compare(const void* a, const void* b) {
