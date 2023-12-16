@@ -52,16 +52,11 @@
  *        node may have at most 2t children. We say that a node is full if it
  *        contains exactly 2t - 1 keys.
  */
-struct _BTreeNodeKey {
-  /* Actual value of the key. */
-  void* value;
-  /* Duplicate element count. */
-  int count;
-};
-
 struct _BTreeNode {
-  /* N keys. */
-  struct _BTreeNodeKey* keys;
+  /* N keys. (Element size is stored in BTree) */
+  void* keys;
+  /* Duplicate element count for each key. */
+  int* key_counts;
   /* N + 1 pointers to its children. */
   struct _BTreeNode** children;
   /* The number of keys currently stored in the node. */
@@ -72,12 +67,8 @@ struct _BTreeNode {
   bool is_leaf;
 };
 
-//static void _b_tree_node_key_init(struct _BTreeNodeKey* key, void* value) {
-//
-//}
-
 /* At most 2*t children, at most 2*t - 1 keys. */
-static struct _BTreeNode* _b_tree_node_init(int t) {
+static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
   var node = (struct _BTreeNode*)malloc(sizeof(struct _BTreeNode));
   if (node == NULL) {
     return NULL;
@@ -90,21 +81,38 @@ static struct _BTreeNode* _b_tree_node_init(int t) {
   if ((node -> children = malloc(2 * t * sizeof(struct _BTreeNode*))) == NULL) {
     return NULL;
   }
-  node -> keys = malloc((2 * t - 1) * sizeof(struct _BTreeNodeKey));
-  if (node -> keys == NULL) {
+  if ((node -> keys = malloc((2 * t - 1) * element_size)) == NULL) {
+    return NULL;
+  }
+  if ((node -> key_counts = malloc((2 * t - 1) * element_size)) == NULL) {
     return NULL;
   }
   return node;
 }
 
 static void _b_tree_node_deinit(struct _BTreeNode* node) {
-  free((*node).children);
-  free((*node).keys);
+  free(node -> children);
+  free(node -> keys);
+  free(node -> key_counts);
+}
+
+static int _b_tree_maintain_size(struct _BTreeNode* node) {
+  if (node == NULL) {
+    return 0;
+  }
+  var size = 0;
+  var i = 0;
+  for (i = 0; i < node -> n; i += 1) {
+    size += (node -> children[i] == NULL ? 0 : node -> children[i] -> size) +
+            node -> key_counts[i];
+  }
+  return size;
 }
 
 /*
  * x: a nonfull internal node
  * i: an index such that x.c_i is a full child of x
+ * width: a.k.a. element_size
  *
  * The procedure then splits this child in two and adjusts x so that it has an 
  * additional child. To split a full root, we will first make the root a child
@@ -138,33 +146,42 @@ static void _b_tree_node_deinit(struct _BTreeNode* node) {
  * becomes a new child of x, positioned just after y in x's table of children.
  * The median key of y moves up to become the key in x that separates y and z.
  */
-static void _b_tree_split_child(struct _BTreeNode* x, int t, int i) {
-  var z = _b_tree_node_init(t);
+static void _b_tree_split_child(struct _BTreeNode* x, int t, int i, int width) {
+  var z = _b_tree_node_init(t, width);
   var y = x -> children[i];
   z -> is_leaf = y -> is_leaf;
   z -> n = t - 1;
-  /* Move t - 1 largest keys from y to z */
-  memmove(z -> keys, y -> keys + t, (t - 1) * sizeof(struct _BTreeNodeKey));
+  /* 
+   * Move t - 1 largest keys from y to z
+   * Example: in Figure: (t = 4)
+   * ind: 0    1    2    3    4    5    6
+   * y: ['P', 'Q', 'R', 'S', 'T', 'U', 'V']
+   * z will have 'T', 'U', 'V', and 'T' has an index of t.
+   */
+  memmove(z -> keys, y -> keys + t * width, (t - 1) * width);
+  /* Move the corresponding key_counts */
+  memmove(z -> key_counts, y -> key_counts + t * width, (t - 1) * width);
   /* Movie t largest children from y to z */
   if (!y -> is_leaf) {
     memmove(z -> children, y -> children + t, t * sizeof(struct _BTreeNode*));
   }
   y -> n = t - 1;
-  /* Make room for z (children) */
+  /* Make room for z (children) in x */
   memmove(
     x -> children + i + 1 + 1,
     x -> children + i + 1,
     (x -> n - i) * sizeof(struct _BTreeNode*)
   );
   x -> children[i + 1] = z;
-  /* Make room for z (keys) */
+  /* Make room for z (keys) in x */
   memmove(
-    x -> keys + i + 1,
-    x -> keys + i,
-    (x -> n - i) * sizeof(struct _BTreeNodeKey)
+    x -> keys + (i + 1) * width,
+    x -> keys + i * width,
+    (x -> n - i) * width
   );
-  x -> keys[i] = y -> keys[t - 1];
-  // TODO: maintain subtree size
+  memcpy(x -> keys + i * width, y -> keys + (t - 1) * width, width);
+  y -> size = _b_tree_maintain_size(y);
+  y -> size = _b_tree_maintain_size(z);
   x -> n += 1;
 }
 
