@@ -61,8 +61,6 @@ struct _BTreeNode {
   struct _BTreeNode** children;
   /* The number of keys currently stored in the node. */
   int n;
-  /* The size of the subtree. */
-  int size;
   /* A Boolean value indicating whether or not the node is a leaf. */
   bool is_leaf;
 };
@@ -76,7 +74,6 @@ static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
 
   node -> is_leaf = true;
   node -> n = 0;
-  node -> size = 0;
 
   if ((node -> children = malloc(2 * t * sizeof(struct _BTreeNode*))) == NULL) {
     return NULL;
@@ -94,19 +91,6 @@ static void _b_tree_node_deinit(struct _BTreeNode* node) {
   free(node -> children);
   free(node -> keys);
   free(node -> key_counts);
-}
-
-static int _b_tree_maintain_size(struct _BTreeNode* node) {
-  if (node == NULL) {
-    return 0;
-  }
-  var size = 0;
-  var i = 0;
-  for (i = 0; i < node -> n; i += 1) {
-    size += (node -> children[i] == NULL ? 0 : node -> children[i] -> size) +
-            node -> key_counts[i];
-  }
-  return size;
 }
 
 /*
@@ -166,23 +150,37 @@ static void _b_tree_split_child(struct _BTreeNode* x, int t, int i, int width) {
     memmove(z -> children, y -> children + t, t * sizeof(struct _BTreeNode*));
   }
   y -> n = t - 1;
-  /* Make room for z (children) in x */
+  /* Make room (children) in x */
   memmove(
     x -> children + i + 1 + 1,
     x -> children + i + 1,
     (x -> n - i) * sizeof(struct _BTreeNode*)
   );
   x -> children[i + 1] = z;
-  /* Make room for z (keys) in x */
+  /* Make room (keys) in x; (void* not auto-scaled) */
   memmove(
     x -> keys + (i + 1) * width,
     x -> keys + i * width,
     (x -> n - i) * width
   );
   memcpy(x -> keys + i * width, y -> keys + (t - 1) * width, width);
-  y -> size = _b_tree_maintain_size(y);
-  y -> size = _b_tree_maintain_size(z);
+  /* Make room (key_counts) in x */
+  memmove(
+    x -> key_counts + i + 1,
+    y -> key_counts + i,
+    (x -> n - i) * sizeof(int)
+  );
+  x -> key_counts[i] = y -> key_counts[t - 1];
+
   x -> n += 1;
+}
+
+static void _b_tree_insert_nonfull(
+  struct _BTreeNode* x,
+  void* k,
+  int (*compare)(const void*, const void*)
+) {
+  
 }
 
 /*===----------------------------------------------------------------------===*/
