@@ -186,17 +186,18 @@ static void _b_tree_split_child(struct _BTreeNode* x, int t, int i, int width) {
 static void _b_tree_insert_nonfull(
   struct _BTreeNode* x,
   void* k,
+  int t,
   int width,
   int (*compare)(const void*, const void*)
 ) {
   var i = x -> n - 1;
+  /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
+  /* FIXME: Use binary search */
+  while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
+    i -= 1;
+  }
   if (x -> is_leaf) {
     /* The case in which x is a leaf node. Insert key k into x directly. */
-    /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
-    /* FIXME: Use binary search */
-    while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
-      i -= 1;
-    }
     if (compare(k, x -> keys + i * width) == 0) { /* Insert a duplicate key */
       x -> key_counts[i] += 1;
       return;
@@ -221,7 +222,16 @@ static void _b_tree_insert_nonfull(
     memcpy(x -> keys + (i + 1) * width, k, width);
     x -> n += 1;
   } else {
-
+    i += 1;
+    /* Detect whether the recursion would descend to a full child */
+    if (x -> children[i] -> n == 2 * t - 1) {
+      _b_tree_split_child(x, t, i, width);
+      /* does key k go into child i or child i+1? */
+      if (compare(k, x -> keys + i * width)) {
+        i += 1;
+      }
+    }
+    _b_tree_insert_nonfull(x -> children[i], k, t, width, compare);
   }
 }
 
