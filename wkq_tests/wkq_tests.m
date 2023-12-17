@@ -12,6 +12,8 @@
 
 #import "array.h"
 #import "deque.h"
+
+#import "binary_search.h"
 #import "sort.h"
 
 #define var __auto_type
@@ -451,6 +453,26 @@ int compare(const void* a, const void* b) {
   printf("\n");
 
   deque_deinit(&deque);
+}
+
+// MARK: - binary_search
+
+- (void)test_binary_search {
+  int array[] = {1, 3, 5, 7, 9, 11, 13};
+  var key = 5;
+  XCTAssertEqual(5, array[binary_search(&key, array, 7, sizeof(int), compare)]);
+  /* subarray: 7, 9, 11, 13 */
+  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), -1);
+  key = 7;
+  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 0);
+  key = 9;
+  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 1);
+  key = 11;
+  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 2);
+  key = 13;
+  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 3);
+  key = 15;
+  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), -1);
 }
 
 @end
