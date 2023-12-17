@@ -22,6 +22,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+//#include "binary_search.h"
+
 #define var __auto_type
 
 /*
@@ -34,12 +36,12 @@
  * B-tree properties:
  *   1) Every node x has the following attributes:
  *     a. x.n, the number of keys currently stored in node x
- *     b. the x.n keys themselves, x.key_1, x.key_2, ..., x.keyx_n, stored in 
- *        nondecreasing order, so that x.key_1 ≤ x.key_2 ≤ ... ≤ x_keyx_n
+ *     b. the x.n keys themselves, x.key_0, x.key_1, ..., x.keyx_n-1, stored in
+ *        nondecreasing order, so that x.key_0 < x.key_1 < ... < x_keyx_n-1
  *     c. x.leaf, a boolean value that is TRUE if x is a leaf and FALSE if x is
  *        an internal node
- *   2) Each internal node x also contains x.n+1 pointers x.c_1, x.c_2, ...,
- *      x.c_n+1 to its children. Leaf nodes have no children, and so their c_i
+ *   2) Each internal node x also contains x.n+1 pointers x.c_0, x.c_1, ...,
+ *      x.c_n to its children. Leaf nodes have no children, and so their c_i
  *      attributes are undefined
  *
  *   5) Nodes have lower and upper bounds on the number of keys they can 
@@ -175,12 +177,52 @@ static void _b_tree_split_child(struct _BTreeNode* x, int t, int i, int width) {
   x -> n += 1;
 }
 
+/*
+ * The auxiliary recursive procedure _b_tree_insert_nonfull inserts key k into
+ * node x, which is assumed to be nonfull when the procedure is called. The
+ * operation of b_tree_insert and the recursive operation of
+ * _b_tree_insert_nonfull guarantee that this assumption is true.
+ */
 static void _b_tree_insert_nonfull(
   struct _BTreeNode* x,
   void* k,
+  int width,
   int (*compare)(const void*, const void*)
 ) {
-  
+  var i = x -> n - 1;
+  if (x -> is_leaf) {
+    /* The case in which x is a leaf node. Insert key k into x directly. */
+    /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
+    /* FIXME: Use binary search */
+    while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
+      i -= 1;
+    }
+    if (compare(k, x -> keys + i * width) == 0) { /* Insert a duplicate key */
+      x -> key_counts[i] += 1;
+      return;
+    }
+    /* 
+     * Move keys[i+1..<n] to keys[i+2...n], make room for new k.
+     * Example: k = 'D', we get i = 1.
+     *   0    1    2    3
+     * ['A', 'B', 'E', 'G']
+     *        ↑
+     *        i
+     * Then, (i + 1) is the number of element not moved. => # moved = n - (i+1)
+     */
+    memmove(
+      x -> keys + (i + 2) * width,
+      x -> keys + (i + 1) * width,
+      (x -> n - i - 1) * width
+    );
+    /*
+     * Now keys[i+1] is the right place for k,
+     */
+    memcpy(x -> keys + (i + 1) * width, k, width);
+    x -> n += 1;
+  } else {
+
+  }
 }
 
 /*===----------------------------------------------------------------------===*/
