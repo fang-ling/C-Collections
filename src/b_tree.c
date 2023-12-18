@@ -77,7 +77,7 @@ static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
   node -> is_leaf = true;
   node -> n = 0;
 
-  if ((node -> children = malloc(2 * t * sizeof(struct _BTreeNode*))) == NULL) {
+  if ((node -> children = calloc(2 * t, sizeof(struct _BTreeNode*))) == NULL) {
     return NULL;
   }
   if ((node -> keys = malloc((2 * t - 1) * element_size)) == NULL) {
@@ -121,7 +121,6 @@ static void _b_tree_node_deinit(struct _BTreeNode* node) {
  *  +-------↓-------+                    +----/--+ +--\----+
  *  | P Q R S T U V |                    | P Q R | | T U V |
  *  +---------------+                    +-------+ +-------+
- *
  *
  *                  Figure: Splitting a node with t = 4.
  *
@@ -233,6 +232,59 @@ static void _b_tree_insert_nonfull(
     }
     _b_tree_insert_nonfull(x -> children[i], k, t, width, compare);
   }
+}
+
+struct BTree {
+  struct _BTreeNode* root;
+
+  /* The number of elements in the B-tree. */
+  int count;
+  /* The size of stored Element type. */
+  int element_size;
+  /* A fixed integer t ≥ 2 called the minimum degree of the B-tree. */
+  int t;
+
+  int (*compare)(const void*, const void*);
+
+  /* A Boolean value indicating whether or not the array is empty. */
+  bool is_empty;
+};
+
+/* MARK: - Creating and Destroying a B-Tree */
+
+/* Creates an empty BTree. */
+void b_tree_init(
+  struct BTree* tree,
+  int t,
+  int element_size,
+  int (*compare)(const void*, const void*)
+) {
+  (*tree).root = _b_tree_node_init(t, element_size);
+  (*tree).t = t;
+  (*tree).element_size = element_size;
+  (*tree).compare = compare;
+
+  (*tree).count = 0;
+  (*tree).is_empty = true;
+}
+
+/* Destroys a BTree. (postorder tree traversal) */
+static void _b_tree_deinit(struct _BTreeNode* node) {
+  if (node != NULL) {
+    var i = 0;
+    for (i = 0; i < node -> n; i += 1) {
+      _b_tree_node_deinit(node -> children[i]);
+    }
+    free(node -> keys);
+    free(node -> key_counts);
+    free(node -> children);
+    free(node);
+  }
+}
+
+/* Destroys a BTree. */
+void b_tree_deinit(struct BTree* tree) {
+  _b_tree_deinit((*tree).root);
 }
 
 /*===----------------------------------------------------------------------===*/
