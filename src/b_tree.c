@@ -234,6 +234,32 @@ static void _b_tree_insert_nonfull(
   }
 }
 
+/*
+ * We insert a key k into a B-tree T of height h in a single pass down the tree.
+ * The _b_tree_insert procedure uses _b_tree_split_child to guarantee that the
+ * recursion never descends to a full node.
+ */
+static void _b_tree_insert(
+  struct _BTreeNode* root,
+  void* k,
+  int t,
+  int width,
+  int (*compare)(const void*, const void*)
+) {
+  var r = root;
+  if (r -> n == 2 * t - 1) {
+    /* s will be the new root */
+    var s = _b_tree_node_init(t, width);
+    root = s;
+    s -> is_leaf = false;
+    s -> children[0] = r;
+    _b_tree_split_child(s, t, 0, width);
+    _b_tree_insert_nonfull(s, k, t, width, compare);
+  } else {
+    _b_tree_insert_nonfull(r, k, t, width, compare);
+  }
+}
+
 struct BTree {
   struct _BTreeNode* root;
 
