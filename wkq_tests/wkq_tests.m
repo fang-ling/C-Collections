@@ -251,6 +251,27 @@ bool int_equal(const void* a, const void* b) {
   array_deinit(&rhs);
 }
 
+- (void)test_array_swap_at {
+  struct Array lhs;
+  struct Array rhs;
+  array_init(&lhs, sizeof(int));
+  array_init(&rhs, sizeof(int));
+
+  for (var i = 0; i < 100; i += 1) {
+    array_append(&lhs, &i);
+    array_append(&rhs, &i);
+  }
+
+  ((int*)lhs._storage)[0] = 1;
+  ((int*)lhs._storage)[1] = 0;
+  array_swap_at(&rhs, 0, 1);
+
+  XCTAssertTrue(array_equal(&lhs, &rhs));
+
+  array_deinit(&lhs);
+  array_deinit(&rhs);
+}
+
 // MARK: - sort
 
 int compare(const void* a, const void* b) {

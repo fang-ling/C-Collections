@@ -83,6 +83,9 @@ int array_first_index(
 /* Sorts the collection in place. */
 void array_sort(struct Array* array, int (*compare)(const void*, const void*));
 
+/* Exchanges the values at the specified indices of the collection. */
+int array_swap_at(struct Array* array, int i, int j);
+
 /*
  * Returns a Boolean value indicating whether two arrays contain the same
  * elements in the same order.

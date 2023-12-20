@@ -267,9 +267,29 @@ void array_sort(struct Array* array, int (*compare)(const void*, const void*)) {
   sort((*array)._storage, (*array).count, (*array).element_size, compare);
 }
 
+/* Exchanges the values at the specified indices of the collection. */
+int array_swap_at(struct Array* array, int i, int j) {
+  var err = 0;
+  if ((err = _check_index(array, i)) != 0) {
+    return err;
+  }
+  if ((err = _check_index(array, j)) != 0) {
+    return err;
+  }
+  if (i == j) {
+    return 0;
+  }
+  var width = (*array).element_size;
+  var buf = malloc(width);
+  memcpy(buf, (*array)._storage + i * width, width);
+  memcpy((*array)._storage + i * width, (*array)._storage + j * width, width);
+  memcpy((*array)._storage + j * width, buf, width);
+  return 0;
+}
+
 /* MARK: - Comparing Arrays */
 
-/* 
+/*
  * Returns a Boolean value indicating whether two arrays contain the same
  * elements in the same order.
  */
