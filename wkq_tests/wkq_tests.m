@@ -156,55 +156,40 @@
   array_deinit(&array);
 }
 
-bool where_1(const void* elem) {
-  if (*(int*)elem < 59) {
-    return true;
-  }
-  return false;
-}
-
-bool where_2(const void* elem) {
-  if (*(int*)elem == 12333) {
-    return true;
-  }
-  return false;
+bool int_equal(const void* a, const void* b) {
+  return *(int*)a == *(int*)b;
 }
 
 - (void)test_array_contains {
   struct Array array;
   array_init(&array, sizeof(int));
 
-  XCTAssertFalse(array_contains(&array, where_1));
+  var val = 58;
+  XCTAssertFalse(array_contains(&array, &val, int_equal));
 
   int expenses[] = {19358, 12333, 19348, 19306, 19306, 58};
   for (var i = 0; i < 6; i += 1) {
     array_append(&array, &expenses[i]);
   }
-  XCTAssertTrue(array_contains(&array, where_1));
-
-  XCTAssertTrue(array_contains(&array, where_2));
+  XCTAssertTrue(array_contains(&array, &val, int_equal));
+  val = 12333;
+  XCTAssertTrue(array_contains(&array, &val, int_equal));
 
   array_deinit(&array);
-}
-
-bool where_3(const void* elem) {
-  if (*(int*)elem % 10 == 3) {
-    return true;
-  }
-  return false;
 }
 
 - (void)test_array_first_index {
   struct Array array;
   array_init(&array, sizeof(int));
 
-  XCTAssertEqual(array_first_index(&array, where_3), -1);
+  var val = 12333;
+  XCTAssertEqual(array_first_index(&array, &val, int_equal), -1);
 
   int input[] = {19358, 12333, 19348, 19306, 19306, 58};
   for (var i = 0; i < 6; i += 1) {
     array_append(&array, &input[i]);
   }
-  XCTAssertEqual(array_first_index(&array, where_3), 1);
+  XCTAssertEqual(array_first_index(&array, &val, int_equal), 1);
 
   array_deinit(&array);
 }

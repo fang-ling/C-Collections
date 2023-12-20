@@ -62,76 +62,23 @@ int array_remove_last(struct Array* array);
 int array_remove_all(struct Array* array);
 
 /*
- * Returns a Boolean value indicating whether the sequence contains an element
- * that satisfies the given predicate.
- *
- * Parameters:
- *   where: A function pointer that takes an element of the sequence as its
- *          argument and returns a Boolean value that indicates whether the
- *          passed element represents a match.
- *
- * Discussion:
- *   This example shows how you can check an array for an expense less than $59.
- *
- *   ```
- *   bool where(const void* elem) {
- *     if (*(int*)elem < 59) {
- *       return true;
- *     }
- *     return false;
- *   }
- *
- *   struct Array array;
- *   array_init(&array, sizeof(int));
- *
- *   int expenses[] = {19358, 12333, 19348, 19306, 19306, 58};
- *   for (var i = 0; i < 6; i += 1) {
- *     array_append(&array, &expenses[i]);
- *   }
- *   array_contains(&array, where); // Returnes true
- *
- *   array_deinit(&array);
- *   ```
+ * Returns a Boolean value indicating whether the sequence contains the given
+ * element.
  */
-bool array_contains(struct Array* array, bool (*where)(const void*));
+bool array_contains(
+  struct Array* array,
+  void* key,
+  bool (*equal)(const void*, const void*)
+);
 
 /*
- * Returns the first index in which an element of the collection satisfies the
- * given predicate.
- *
- * Parameters:
- *   where: A function pointer that takes an element of the sequence as its
- *          argument and returns a Boolean value that indicates whether the
- *          passed element represents a match.
- *
- * Return Value:
- *  The index of the first element for which `where` returns true. If no
- *  elements in the collection satisfy the given predicate, returns -1.
- *
- * Disscussion:
- *   Here’s an example that finds a number that ends with the digit `3`:
- *
- *   ```
- *   bool where(const void* elem) {
- *     if (*(int*)elem % 10 == 3) {
- *       return true;
- *     }
- *     return false;
- *   }
- *
- *   struct Array array;
- *   array_init(&array, sizeof(int));
- *
- *   int input[] = {19358, 12333, 19348, 19306, 19306, 58};
- *   for (var i = 0; i < 6; i += 1) {
- *     array_append(&array, &input[i]);
- *   }
- *   array_first_index(&array, where_3); // Returns 1
- *
- *   array_deinit(&array);
- *   ```
+ * Returns the first index where the specified value appears in the collection.
  */
-int array_first_index(struct Array* array, bool (*where)(const void*));
+int array_first_index(
+  struct Array* array,
+  void* key,
+  bool (*equal)(const void*, const void*)
+);
 
 /* Sorts the collection in place. */
 void array_sort(struct Array* array, int (*compare)(const void*, const void*));
