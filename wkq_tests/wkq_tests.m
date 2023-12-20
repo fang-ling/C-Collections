@@ -11,6 +11,7 @@
 #import <XCTest/XCTest.h>
 
 #import "array.h"
+#import "b_tree.h"
 #import "deque.h"
 
 #import "binary_search.h"
@@ -473,6 +474,25 @@ int compare(const void* a, const void* b) {
   XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 3);
   key = 15;
   XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), -1);
+}
+
+// MARK: - b-tree
+
+- (void)test_b_tree {
+  struct BTree tree;
+  b_tree_init(&tree, 1024, sizeof(int), compare);
+
+  for (var i = 0; i < 65536; i += 1) {
+    b_tree_insert(&tree, &i);
+  }
+
+//  printf(tree.root);
+
+//  for (var i = 0; i < 65536; i += 1) {
+//    XCTAssertTrue(b_tree_contains(&tree, &i));
+//  }
+
+  b_tree_deinit(&tree);
 }
 
 @end

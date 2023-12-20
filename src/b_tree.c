@@ -89,11 +89,11 @@ static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
   return node;
 }
 
-static void _b_tree_node_deinit(struct _BTreeNode* node) {
-  free(node -> children);
-  free(node -> keys);
-  free(node -> key_counts);
-}
+//static void _b_tree_node_deinit(struct _BTreeNode* node) {
+//  free(node -> children);
+//  free(node -> keys);
+//  free(node -> key_counts);
+//}
 
 /*
  * x: a nonfull internal node
@@ -260,6 +260,39 @@ static void _b_tree_insert(
   }
 }
 
+static struct _BTreeNode* _b_tree_search(
+  struct _BTreeNode* x,
+  void* k,
+  int width,
+  int* result_i,
+  int (*compare)(const void*, const void*)
+) {
+  var i = 0;
+  var low = 0;
+  var high = x -> n - 1;
+  while (low <= high) {
+    var mid = (low + high) / 2;
+    if (compare(k, x -> keys + mid * width) == 0) {
+      break;
+    } else if (compare(k, x -> keys + mid * width) > 0) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+    i = mid;
+  }
+
+  if (i < x -> n && compare(k, x -> keys + i * width) == 0) {
+    *result_i = i;
+    return x;
+  } else if (x -> is_leaf) {
+    *result_i = -1;
+    return NULL;
+  } else {
+    return _b_tree_search(x -> children[i], k, width, result_i, compare);
+  }
+}
+
 struct BTree {
   struct _BTreeNode* root;
 
@@ -299,7 +332,7 @@ static void _b_tree_deinit(struct _BTreeNode* node) {
   if (node != NULL) {
     var i = 0;
     for (i = 0; i < node -> n; i += 1) {
-      _b_tree_node_deinit(node -> children[i]);
+      _b_tree_deinit(node -> children[i]);
     }
     free(node -> keys);
     free(node -> key_counts);
@@ -311,6 +344,37 @@ static void _b_tree_deinit(struct _BTreeNode* node) {
 /* Destroys a BTree. */
 void b_tree_deinit(struct BTree* tree) {
   _b_tree_deinit((*tree).root);
+}
+
+/* MARK: - Adding Elements */
+
+/* Adds a new element in the B-Tree. */
+void b_tree_insert(struct BTree* tree, void* key) {
+  _b_tree_insert(
+    (*tree).root,
+    key,
+    (*tree).t,
+    (*tree).element_size,
+    (*tree).compare
+  );
+}
+
+/* MARK: - Finding Elements */
+
+bool b_tree_contains(struct BTree* tree, void* key) {
+  var i = 0;
+  if (
+    _b_tree_search(
+      (*tree).root,
+      key,
+      (*tree).element_size,
+      &i,
+      (*tree).compare
+    ) == NULL
+  ) {
+    return false;
+  }
+  return true;
 }
 
 /*===----------------------------------------------------------------------===*/
