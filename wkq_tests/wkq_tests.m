@@ -484,19 +484,68 @@ int compare(const void* a, const void* b) {
 
 // MARK: - b-tree
 
-- (void)test_b_tree {
-  struct BTree tree;
-  b_tree_init(&tree, 1024, sizeof(int), compare);
-
-  for (var i = 0; i < 65536; i += 1) {
-    b_tree_insert(&tree, &i);
+int char_compare(const void* a, const void* b) {
+  if (*(char*)a > *(char*)b) {
+    return 1;
+  } else if (*(char*)a < *(char*)b) {
+    return -1;
   }
+  return 0;
+}
 
-//  printf(tree.root);
+struct _BTreeNode {
+  /* N keys. (Element size is stored in BTree) */
+  void* keys;
+  /* Duplicate element count for each key. */
+  int* key_counts;
+  /* N + 1 pointers to its children. */
+  struct _BTreeNode** children;
+  /* The number of keys currently stored in the node. */
+  int n;
+  /* A Boolean value indicating whether or not the node is a leaf. */
+  bool is_leaf;
+};
 
-//  for (var i = 0; i < 65536; i += 1) {
-//    XCTAssertTrue(b_tree_contains(&tree, &i));
-//  }
+/* This test focus on tree structure */
+- (void)test_b_tree {
+
+  struct BTree tree;
+  b_tree_init(&tree, 2, sizeof(char), char_compare); /* 2-3-4 Tree */
+
+  /* Insert F */
+  var c = (char)'F';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(*(char*)tree.root->keys, 'F');
+  XCTAssertEqual(tree.root->children[0], NULL);
+
+  /* Insert S */
+  c = 'S';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'F');
+  XCTAssertEqual(((char*)tree.root->keys)[1], 'S');
+  XCTAssertEqual(tree.root->children[0], NULL);
+
+  /* Insert Q */
+  c = 'Q';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'F');
+  XCTAssertEqual(((char*)tree.root->keys)[1], 'Q');
+  XCTAssertEqual(((char*)tree.root->keys)[2], 'S');
+  XCTAssertEqual(tree.root->children[0], NULL);
+
+  /* Insert K (node split) */
+  c = 'K';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(tree.root->n, 1);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'Q');
+  printf("%s\n", (char*)tree.root->keys);
+//  XCTAssertEqual(tree.root->children[0]->n, 2);
+//  XCTAssertEqual(((char*)tree.root->children[0]->keys)[0], 'F');
+//  XCTAssertEqual(((char*)tree.root->children[0]->keys)[1], 'K');
+//  XCTAssertEqual(tree.root->children[1]->n, 1);
+//  XCTAssertEqual(((char*)tree.root->children[1]->keys)[0], 'S');
+
+  /* Insert C, L, H, T, V, W, M, R, N, P, A, B, X, Y, D, Z, E */
 
   b_tree_deinit(&tree);
 }
