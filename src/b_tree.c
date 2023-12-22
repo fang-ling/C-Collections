@@ -89,12 +89,6 @@ static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
   return node;
 }
 
-//static void _b_tree_node_deinit(struct _BTreeNode* node) {
-//  free(node -> children);
-//  free(node -> keys);
-//  free(node -> key_counts);
-//}
-
 /*
  * x: a nonfull internal node
  * i: an index such that x.c_i is a full child of x
@@ -240,17 +234,17 @@ static void _b_tree_insert_nonfull(
  * recursion never descends to a full node.
  */
 static void _b_tree_insert(
-  struct _BTreeNode* root,
+  struct _BTreeNode** root, /* We are modifying of value of root! */
   void* k,
   int t,
   int width,
   int (*compare)(const void*, const void*)
 ) {
-  var r = root;
+  var r = *root;
   if (r -> n == 2 * t - 1) {
     /* s will be the new root */
     var s = _b_tree_node_init(t, width);
-    root = s;
+    *root = s;
     s -> is_leaf = false;
     s -> children[0] = r;
     _b_tree_split_child(s, t, 0, width);
@@ -351,7 +345,7 @@ void b_tree_deinit(struct BTree* tree) {
 /* Adds a new element in the B-Tree. */
 void b_tree_insert(struct BTree* tree, void* key) {
   _b_tree_insert(
-    (*tree).root,
+    &(*tree).root,
     key,
     (*tree).t,
     (*tree).element_size,
