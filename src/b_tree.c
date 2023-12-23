@@ -185,7 +185,7 @@ static void _b_tree_insert_nonfull(
 ) {
   var i = x -> n - 1;
   /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
-  /* FIXME: Use binary search */
+  /* FIXME: Use binary search (lower_bound) */
   while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
     i -= 1;
   }
@@ -251,6 +251,29 @@ static void _b_tree_insert(
     _b_tree_insert_nonfull(s, k, t, width, compare);
   } else {
     _b_tree_insert_nonfull(r, k, t, width, compare);
+  }
+}
+
+/*
+ * 1. If the key k is in node x and x is a leaf, delete the key k from x.
+ */
+static void _b_tree_remove_subtree(
+  struct _BTreeNode* x,
+  void* k,
+  int t,
+  int width,
+  int (*compare)(const void*, const void*)
+) {
+  var i = x -> n - 1;
+  /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
+  /* FIXME: Use binary search (lower_bound) */
+  while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
+    i -= 1;
+  }
+  if (i != -1) { /* key k is in node x */
+    if (x -> is_leaf) { /* Case 1 */
+      //TODO: Remove k from x
+    }
   }
 }
 
@@ -344,6 +367,7 @@ void b_tree_deinit(struct BTree* tree) {
 
 /* Adds a new element in the B-Tree. */
 void b_tree_insert(struct BTree* tree, void* key) {
+  /* FIXME: update count & is_empty */
   _b_tree_insert(
     &(*tree).root,
     key,

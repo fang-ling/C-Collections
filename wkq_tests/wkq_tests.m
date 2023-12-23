@@ -556,7 +556,66 @@ struct _BTreeNode {
   XCTAssertEqual(tree.root->children[1]->n, 1);
   XCTAssertEqual(((char*)tree.root->children[1]->keys)[0], 'S');
 
-  /* Insert L, H, T, V, W, M, R, N, P, A, B, X, Y, D, Z, E */
+  /* Insert L */
+  c = 'L';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(tree.root->n, 2);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'F');
+  XCTAssertEqual(((char*)tree.root->keys)[1], 'Q');
+  XCTAssertEqual(tree.root->children[0]->n, 1);
+  XCTAssertEqual(((char*)tree.root->children[0]->keys)[0], 'C');
+  XCTAssertEqual(tree.root->children[1]->n, 2);
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[0], 'K');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[1], 'L');
+  XCTAssertEqual(tree.root->children[2]->n, 1);
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[0], 'S');
+
+  /* Insert H */
+  c = 'H';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'F');
+  XCTAssertEqual(((char*)tree.root->keys)[1], 'Q');
+  XCTAssertEqual(tree.root->children[0]->n, 1);
+  XCTAssertEqual(((char*)tree.root->children[0]->keys)[0], 'C');
+  XCTAssertEqual(tree.root->children[1]->n, 3);
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[0], 'H');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[1], 'K');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[2], 'L');
+  XCTAssertEqual(tree.root->children[2]->n, 1);
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[0], 'S');
+
+  /* Insert T */
+  c = 'T';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'F');
+  XCTAssertEqual(((char*)tree.root->keys)[1], 'Q');
+  XCTAssertEqual(tree.root->children[0]->n, 1);
+  XCTAssertEqual(((char*)tree.root->children[0]->keys)[0], 'C');
+  XCTAssertEqual(tree.root->children[1]->n, 3);
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[0], 'H');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[1], 'K');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[2], 'L');
+  XCTAssertEqual(tree.root->children[2]->n, 2);
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[0], 'S');
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[1], 'T');
+
+  /* Insert V */
+  c = 'V';
+  b_tree_insert(&tree, &c);
+  XCTAssertEqual(((char*)tree.root->keys)[0], 'F');
+  XCTAssertEqual(((char*)tree.root->keys)[1], 'Q');
+  XCTAssertEqual(tree.root->children[0]->n, 1);
+  XCTAssertEqual(((char*)tree.root->children[0]->keys)[0], 'C');
+  XCTAssertEqual(tree.root->children[1]->n, 3);
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[0], 'H');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[1], 'K');
+  XCTAssertEqual(((char*)tree.root->children[1]->keys)[2], 'L');
+  XCTAssertEqual(tree.root->children[2]->n, 3);
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[0], 'S');
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[1], 'T');
+  XCTAssertEqual(((char*)tree.root->children[2]->keys)[2], 'V');
+
+  /* Insert W, M, R, N, P, A, B, X, Y, D, Z, E */
 
   b_tree_deinit(&tree);
 }
