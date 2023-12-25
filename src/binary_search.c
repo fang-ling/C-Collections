@@ -18,7 +18,7 @@
  * information
  */
 
-#include <stddef.h>
+#include <stdbool.h>
 
 #define var __auto_type
 
@@ -71,6 +71,21 @@ int lower_bound(
   int (*compare)(const void*, const void*)
 ) {
   return _binary_search(key, base, nel, width, compare);
+}
+
+/* 
+ * Returns a Boolean value indicating whether the sorted sequence contains the
+ * given element.
+ */
+bool binary_search(
+  const void* key,
+  const void* base,
+  int nel,
+  int width,
+  int (*compare)(const void*, const void*)
+) {
+  var i = _binary_search(key, base, nel, width, compare);
+  return i != nel && compare(base + i * width, key) == 0;
 }
 
 /*===----------------------------------------------------------------------===*/

@@ -465,6 +465,17 @@ int compare(const void* a, const void* b) {
 // MARK: - binary_search
 
 - (void)test_binary_search {
+  int array[] = {12333, 12361, 19342, 19348, 19358};
+  for (var i = 0; i < 5; i += 1) {
+    XCTAssertTrue(binary_search(&array[i], array, 5, sizeof(int), compare));
+  }
+  var key = 58;
+  XCTAssertFalse(binary_search(&key, array, 5, sizeof(int), compare));
+  key = 0x7fffff;
+  XCTAssertFalse(binary_search(&key, array, 5, sizeof(int), compare));
+}
+
+- (void)test_lower_bound {
   int array[] = {1, 2, 4, 5, 5, 6};
   /* 1 ≤ 1 at index 0 */
   XCTAssertEqual(0, lower_bound(&array[0], array, 6, sizeof(int), compare));

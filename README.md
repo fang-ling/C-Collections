@@ -14,5 +14,5 @@ Objective-C codes are only for Xcode unit tests (`xctest`).
 - `Array` [`v1.5`] An ordered, random-access collection.
 - `Deque` [`v1.1`] A double-ended queue backed by a ring buffer. Deques are random-access collections that allows fast insertion and deletion at both its beginning and its end.
 
-- `binary_search()` [`v1.0`] An efficient algorithm used to quickly locate a specific target value within a sorted collection.
+- `binary_search()` [`v1.1`] An efficient algorithm used to quickly locate a specific target value within a sorted collection.
 - `sort()` [`v1.0`] Randomized quicksort with insertion sort on small arrays and optimized for sorted and reverse-sorted arrays.
