@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#include "binary_search.h"
+#include "binary_search.h"
 
 #define var __auto_type
 
@@ -183,12 +183,8 @@ static void _b_tree_insert_nonfull(
   int width,
   int (*compare)(const void*, const void*)
 ) {
-  var i = x -> n - 1;
   /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
-  /* FIXME: Use binary search (lower_bound) */
-  while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
-    i -= 1;
-  }
+  var i = lower_bound(k, x -> keys, x -> n, width, compare) - 1;
   if (x -> is_leaf) {
     /* The case in which x is a leaf node. Insert key k into x directly. */
     if (compare(k, x -> keys + i * width) == 0) { /* Insert a duplicate key */
@@ -264,12 +260,8 @@ static void _b_tree_remove_subtree(
   int width,
   int (*compare)(const void*, const void*)
 ) {
-  var i = x -> n - 1;
   /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
-  /* FIXME: Use binary search (lower_bound) */
-  while (i >= 0 && compare(k, x -> keys + i * width) < 0) {
-    i -= 1;
-  }
+  var i = lower_bound(k, x -> keys, x -> n, width, compare) - 1;
   if (i != -1) { /* key k is in node x */
     if (x -> is_leaf) { /* Case 1 */
       //TODO: Remove k from x
