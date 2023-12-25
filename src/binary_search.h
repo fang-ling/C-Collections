@@ -12,10 +12,10 @@
 #define binary_search_h
 
 /*
- * Returns an index to a matching member of the array, or -1 if no match is
- * found.
+ * Returns the first position in which the new element cloud be inserted without
+ * changing the ordering, or nel if no such element is found.
  */
-int binary_search(
+int lower_bound(
   const void* key,
   const void* base,
   int nel,

@@ -465,21 +465,26 @@ int compare(const void* a, const void* b) {
 // MARK: - binary_search
 
 - (void)test_binary_search {
-  int array[] = {1, 3, 5, 7, 9, 11, 13};
+  int array[] = {1, 2, 4, 5, 5, 6};
+  /* 1 ≤ 1 at index 0 */
+  XCTAssertEqual(0, lower_bound(&array[0], array, 6, sizeof(int), compare));
+  /* 2 ≤ 2 at index 1 */
+  XCTAssertEqual(1, lower_bound(&array[1], array, 6, sizeof(int), compare));
   var key = 5;
-  XCTAssertEqual(5, array[binary_search(&key, array, 7, sizeof(int), compare)]);
-  /* subarray: 7, 9, 11, 13 */
-  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), -1);
+  /* 5 ≤ 5 at index 3 */
+  XCTAssertEqual(3, lower_bound(&key, array, 6, sizeof(int), compare));
+  key = 3;
+  /* 3 ≤ 4 at index 2 */
+  XCTAssertEqual(2, lower_bound(&key, array, 6, sizeof(int), compare));
+  key = 19358;
+  /* 19358 not found */
+  XCTAssertEqual(6, lower_bound(&key, array, 6, sizeof(int), compare));
   key = 7;
-  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 0);
-  key = 9;
-  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 1);
-  key = 11;
-  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 2);
-  key = 13;
-  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), 3);
-  key = 15;
-  XCTAssertEqual(binary_search(&key, array + 3, 4, sizeof(int), compare), -1);
+  /* 7 not found */
+  XCTAssertEqual(6, lower_bound(&key, array, 6, sizeof(int), compare));
+  key = 0;
+  /* 0 ≤ 1 at index 0 */
+  XCTAssertEqual(0, lower_bound(&key, array, 6, sizeof(int), compare));
 }
 
 // MARK: - b-tree

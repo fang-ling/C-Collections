@@ -3,8 +3,8 @@
 /* binary_search START                                  /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 17, 2023                               \ \_\/\_\/\____\/\_\ */
+/* Version: 1.1                                         \ \ \_/__ \_\ \_  __  */
+/* Date: December 25, 2023                               \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -36,11 +36,10 @@
  * respectively, to be less than, to match, or be greater than the array
  * member.
  *
- * The _binary_search() functions returns a pointer to a matching
- * member of the array, or a null pointer if no match is found.  If two
- * members compare as equal, which member is matched is unspecified.
+ * The _binary_search() functions returns the first position in which the new
+ * element cloud be inserted without changing the ordering.
  */
-static void* _binary_search(
+static int _binary_search(
   const void* key,
   const void* base,
   int nel,
@@ -49,34 +48,29 @@ static void* _binary_search(
 ) {
   var low = 0;
   var high = nel;
-  while (low <= high) {
+  while (low < high) {
     var mid = (low + high) / 2;
-    if (compare(key, base + mid * width) == 0) {
-      return (void*)(base + mid * width);
-    } else if (compare(key, base + mid * width) > 0) {
+    if (compare(base + mid * width, key) < 0) {
       low = mid + 1;
     } else {
-      high = mid - 1;
+      high = mid;
     }
   }
-  return NULL;
+  return low;
 }
 
 /*
- * Returns an index to a matching member of the array, or -1 if no match is
- * found.
- *
- * If two members compare as equal, which member is matched is unspecified.
+ * Returns the first position in which the new element cloud be inserted without
+ * changing the ordering, or nel if no such element is found.
  */
-int binary_search(
+int lower_bound(
   const void* key,
   const void* base,
   int nel,
   int width,
   int (*compare)(const void*, const void*)
 ) {
-  var p = _binary_search(key, base, nel, width, compare);
-  return p == NULL ? -1 : (int)((p - base) / width);
+  return _binary_search(key, base, nel, width, compare);
 }
 
 /*===----------------------------------------------------------------------===*/
