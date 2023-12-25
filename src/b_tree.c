@@ -204,7 +204,7 @@ static void _b_tree_insert_nonfull(
       x -> keys + (i + 2) * width,
       x -> keys + (i + 1) * width,
       (x -> n - i - 1) * width
-    );
+    );/* FIXME: May need move key_counts also ? */
     /*
      * Now keys[i+1] is the right place for k,
      */
@@ -262,9 +262,28 @@ static void _b_tree_remove_subtree(
 ) {
   /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
   var i = lower_bound(k, x -> keys, x -> n, width, compare) - 1;
-  if (i != -1) { /* key k is in node x */
-    if (x -> is_leaf) { /* Case 1 */
-      //TODO: Remove k from x
+  if (i != x -> n && compare(k, x -> keys + i * width)) { /* k is in node x */
+    if (x -> key_counts[i] > 1) { /* delete dupicate element */
+      x -> key_counts[i] -= 1;
+      return;
+    }
+    /*
+     * Case 1: Delete key k from node x which is a leaf. Do nothing if node x
+     * does not contain key k.
+     */
+    if (x -> is_leaf) {
+      x -> n -= 1;
+      memmove(
+        x -> keys + (i + 1 - 1) * width,
+        x -> keys + (i + 1) * width,
+        (x -> n - i) * width
+      );
+      memmove(
+        x -> key_counts + i + 1 - 1,
+        x -> key_counts + i + 1,
+        (x -> n - i) * sizeof(int)
+      );
+
     }
   }
 }
