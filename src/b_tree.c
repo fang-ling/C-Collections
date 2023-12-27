@@ -363,6 +363,7 @@ static void _b_tree_remove_from_subtree(
             x -> keys + (i + 1) * width,
             (x -> n - i - 1) * width
           );
+          /* FIXME: May miscalculate the move length? */
           memmove(
             x -> children + i + 1,
             x -> children + i + 2,
@@ -377,6 +378,106 @@ static void _b_tree_remove_from_subtree(
     }
   } else {
     /* Case 3: */
+    var old_child = x -> children[i];
+    /* Ensure that a given child of a node has at least t keys. */
+    var child = x -> children[i];
+    if (child -> n < t) {
+      struct _BTreeNode* left_sibling = NULL;
+      var left_n = 0;
+      if (i > 0) { /* does have a left sibling */
+        left_sibling = x -> children[i - 1];
+        left_n = left_sibling -> n;
+      }
+      if (left_n >= t) {
+        /*
+         * Case 3a: x's left sibling has at least t keys.
+         * Move a key from x into child, move a key from left_sibling up into x,
+         * and move a child pointer from left_sibling into child.
+         */
+        memmove(child -> keys + 1 * width, child -> keys, child -> n * width);
+        memmove(
+          child -> key_counts + 1,
+          child -> key_counts,
+          child -> n * sizeof(int)
+        );
+        memmove(
+          child -> children + 1,
+          child -> children,
+          (child -> n + 1) * width
+        );
+        child -> n += 1;
+        /* Move a key from x into child */
+        memcpy(child -> keys + 0 * width, x -> keys + (i - 1) * width, width);
+        child -> key_counts[0] = x -> key_counts[i - 1];
+        memcpy(
+          x -> keys + (i - 1) * width,
+          left_sibling -> keys + (left_n - 1) * width,
+          width
+        );
+        x -> key_counts[i - 1] = left_sibling -> key_counts[left_n - 1];
+        /* Move appropriate child pointer from left_sibling into child. */
+        if (!child -> is_leaf) {
+          child -> children[0] = left_sibling -> children[left_n];
+        }
+        left_sibling -> n -= 1;
+      } else { /* symmetric with right sibling */
+        struct _BTreeNode* right_sibling = NULL;
+        var right_n = 0;
+        if (i < x -> n) {
+          right_sibling = x -> children[i + 1];
+          right_n = right_sibling -> n;
+        }
+        if (right_n >= t) {
+          /*
+           * Case 3a: x's right sibling has at least t keys.
+           * Move a key from x into child, move a key from right_sibling up into
+           * x, and move a child pointer from right_sibling into child.
+           */
+          /* Move a key from x into child. */
+          memcpy(
+            child -> keys + child -> n * width,
+            x -> keys + i * width,
+            width
+          );
+          child -> key_counts[child -> n] = x -> key_counts[i];
+          /* Move a key from right_sibling up into x. */
+          memcpy(
+            x -> keys + i * width,
+            right_sibling -> keys + 0 * width,
+            width
+          );
+          x -> key_counts[i] = right_sibling -> key_counts[0];
+          /* Move appropriate child pointer from right_sibling into child. */
+          if (!child -> is_leaf) {
+            child -> children[child -> n + 1] = right_sibling -> children[0];
+          }
+          /*
+           * Move all the right sibling's keys and child pointers to the left by
+           * one position.
+           * Only move right_n - 1 items, since we remove the r_s.c[0].
+           */
+          memmove(
+            right_sibling -> keys,
+            right_sibling -> keys + 1 * width,
+            (right_n - 1) * width
+          );
+          memmove(
+            right_sibling -> key_counts,
+            right_sibling -> key_counts + 1,
+            (right_n - 1) * sizeof(int)
+          );
+          memmove(
+            right_sibling -> children,
+            right_sibling -> children + 1,
+            (right_n + 1 - 1) * sizeof(struct _BTreeNode*)
+          );
+          right_sibling -> n -= 1;
+          child -> n += 1;
+        } else {
+          /* Case 3b: */
+        }
+      }
+    }
   }
 }
 
