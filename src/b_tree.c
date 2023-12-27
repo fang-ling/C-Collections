@@ -89,6 +89,13 @@ static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
   return node;
 }
 
+static void _b_tree_node_deinit(struct _BTreeNode* node) {
+  free(node -> keys);
+  free(node -> key_counts);
+  free(node -> children);
+  free(node);
+}
+
 /*
  * x: a nonfull internal node
  * i: an index such that x.c_i is a full child of x
@@ -250,19 +257,31 @@ static void _b_tree_insert(
   }
 }
 
-/*
- * 1. If the key k is in node x and x is a leaf, delete the key k from x.
- */
-static void _b_tree_remove_subtree(
+static struct _BTreeNode* _b_tree_predecessor(struct _BTreeNode* x) {
+  if (x -> is_leaf) {
+    return x;
+  }
+  return _b_tree_predecessor(x -> children[x -> n]);
+}
+
+static struct _BTreeNode* _b_tree_successor(struct _BTreeNode* x) {
+  if (x -> is_leaf) {
+    return x;
+  }
+  return _b_tree_successor(x -> children[0]);
+}
+
+static void _b_tree_remove_from_subtree(
   struct _BTreeNode* x,
   void* k,
   int t,
   int width,
   int (*compare)(const void*, const void*)
 ) {
-  /* Find the place for k: i may be -1 or key[i] is the rightmost key <= k. */
-  var i = lower_bound(k, x -> keys, x -> n, width, compare) - 1;
-  if (i != x -> n && compare(k, x -> keys + i * width)) { /* k is in node x */
+  /* Find k: i may be n or key[i] == k. */
+  var i = lower_bound(k, x -> keys, x -> n, width, compare);
+  /* k is in node x */
+  if (i < x -> n && compare(k, x -> keys + i * width) == 0) {
     if (x -> key_counts[i] > 1) { /* delete dupicate element */
       x -> key_counts[i] -= 1;
       return;
@@ -273,6 +292,10 @@ static void _b_tree_remove_subtree(
      */
     if (x -> is_leaf) {
       x -> n -= 1;
+      /*
+       * Key k is in position i, so shift all keys greater than key[i] one 
+       * position to the left.
+       */
       memmove(
         x -> keys + (i + 1 - 1) * width,
         x -> keys + (i + 1) * width,
@@ -283,8 +306,77 @@ static void _b_tree_remove_subtree(
         x -> key_counts + i + 1,
         (x -> n - i) * sizeof(int)
       );
-
+    } else {
+      /* Case 2: Remove key k = x.key[i] from internal node x. */
+      var y = x -> children[i];
+      if (y -> n >= t) { /* Case 2a: y has at least t keys. */
+        var y_pre = _b_tree_predecessor(y);
+        var k_prime = malloc(width);
+        /* FIXME: copy key_count */
+        memcpy(k_prime, y_pre -> keys + (y_pre -> n - 1) * width, width);
+        _b_tree_remove_from_subtree(y, k_prime, t, width, compare);
+        memcpy(x -> keys + i * width, k_prime, width);
+        free(k_prime);
+      } else { /* y has fewer than t keys */
+        var z = x -> children[i + 1];
+        /* Symmetrically, examine the child z that follows key k in node x. */
+        if (z -> n >= t) {
+          /* Case 2b: z has at least t keys. Symmetric to case 2a. */
+          var z_suc = _b_tree_successor(z);
+          var k_prime = malloc(width);
+          /* FIXME: copy key_count */
+          memcpy(k_prime, z_suc -> keys + 0 * width, width);
+          _b_tree_remove_from_subtree(z, k_prime, t, width, compare);
+          memcpy(x -> keys + i * width, k_prime, width);
+          free(k_prime);
+        } else {
+          /*
+           * Case 2c: Both y and z have t - 1 keys.
+           * Merge ket a and all of z into y, so that x loses both k and the
+           * pointer to z. y then contains 2t - 1 keys. Free z and recursively
+           * key k from y.
+           */
+          /* x -> key[i] == k, merge key k into y */
+          memmove(y -> keys + y -> n * width, x -> keys + i * width, width);
+          y -> key_counts[y -> n] = x -> key_counts[i];
+          /* merge z into y */
+          memmove(y -> keys + (y -> n + 1) * width, z -> keys, z -> n * width);
+          memmove(y -> key_counts + y -> n + 1, z -> key_counts, z -> n * width);
+          /* If y and z are not leaves, copy z's child pointers. */
+          if (!y -> is_leaf) {
+            memmove(
+              y -> children + y -> n + 1,
+              z -> children,
+              (z -> n + 1) * sizeof(struct _BTreeNode*)
+            );
+          }
+          y -> n += z -> n + 1; /* update count */
+          /* Remove k and z from x. */
+          /*
+           * i = 2, n = 5
+           * 0 1 2 3 4
+           * A B C D E
+           *      \---/ n - i - 1 = 5 - 2 - 1 = 2.
+           */
+          memmove(
+            x -> keys + i * width,
+            x -> keys + (i + 1) * width,
+            (x -> n - i - 1) * width
+          );
+          memmove(
+            x -> children + i + 1,
+            x -> children + i + 2,
+            (x -> n - i - 1) * sizeof(struct _BTreeNode*)
+          );
+          x -> n -= 1;
+          _b_tree_node_deinit(z);
+          /* Recursively remove key k from y. */
+          _b_tree_remove_from_subtree(y, k, t, width, compare);
+        }
+      }
     }
+  } else {
+    /* Case 3: */
   }
 }
 
@@ -362,10 +454,7 @@ static void _b_tree_deinit(struct _BTreeNode* node) {
     for (i = 0; i < node -> n; i += 1) {
       _b_tree_deinit(node -> children[i]);
     }
-    free(node -> keys);
-    free(node -> key_counts);
-    free(node -> children);
-    free(node);
+    _b_tree_node_deinit(node);
   }
 }
 
