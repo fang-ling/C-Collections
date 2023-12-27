@@ -474,7 +474,143 @@ static void _b_tree_remove_from_subtree(
           right_sibling -> n -= 1;
           child -> n += 1;
         } else {
-          /* Case 3b: */
+          /*
+           * Case 3b: The child and each of its immediate siblings have t - 1
+           * keys.
+           * Merge the child with one sibling, including moving a key from x
+           * down into the new merged node as the median key of the merged node.
+           */
+          if (left_n > 0) {
+            /*
+             * The child has a left sibling. Merge the child with the left 
+             * sibling.
+             */
+            /* Move everything in child right by t positions. */
+            memmove(
+              child -> keys + t * width,
+              child -> keys + 0 * width,
+              child -> n * width
+            );
+            memmove(
+              child -> key_counts + t,
+              child -> key_counts + 0,
+              child -> n * sizeof(int)
+            );
+            if (!child -> is_leaf) {
+              memmove(
+                child -> children + t,
+                child -> children + 0,
+                (child -> n + 1) * sizeof(struct _BTreeNode*)
+              );
+            }
+            /* Take everything from left_sibling. */
+            memmove(child -> keys, left_sibling -> keys, left_n * width);
+            memmove(
+              child -> key_counts,
+              left_sibling -> key_counts,
+              left_n * sizeof(int)
+            );
+            if (!child -> is_leaf) {
+              memmove(
+                child -> children,
+                left_sibling -> children,
+                (left_n + 1) * sizeof(struct _BTreeNode*)
+              );
+            }
+            /* Move k down from node x into child. */
+            memcpy(
+              child -> keys + (i - 1) * width,
+              x -> keys + (i - 1) + width,
+              width
+            );
+            child -> key_counts[i - 1] = x -> key_counts[i - 1];
+            child -> n += left_n + 1;
+            /* 
+             * Since node x is losing key i - 1 and child pointer i - 1, move
+             * keys i to n - 1 and children i to n left by one position.
+             *
+             * n = 6, i = 2, length = n - i = 6 - 2 = 4
+             * 0 1 2 3 4 5
+             * A B C D E F
+             *     \-----/
+             */
+            memmove(
+              x -> keys + (i - 1) * width,
+              x -> keys + i * width,
+              (x -> n - i) * width
+            );
+            memmove(
+              x -> key_counts + i - 1,
+              x -> key_counts + i,
+              (x -> n - i) * sizeof(int)
+            );
+            memmove(
+              x -> children + i - 1,
+              x -> children + i,
+              (x -> n + 1 - i) * sizeof(struct _BTreeNode*)
+            );
+            x -> n -= 1;
+            _b_tree_node_deinit(left_sibling);
+          } else {
+            /*
+             * Still in case 3b, but the child has no left sibling. Merge the
+             * child with the right sibling.
+             */
+            /* Take everything from right_sibling (keep a hole for k) */
+            memmove(
+              child -> keys + (child -> n + 1) * width,
+              right_sibling -> keys,
+              right_n * width
+            );
+            memmove(
+              child -> key_counts + child -> n + 1,
+              right_sibling -> key_counts,
+              right_n * sizeof(int)
+            );
+            if (!child -> is_leaf) {
+              memmove(
+                child -> children + child -> n + 1,
+                right_sibling -> children,
+                (right_n + 1) * sizeof(struct _BTreeNode*)
+              );
+            }
+            /* Move a key down from node x into the child. */
+            memcpy(
+              child -> keys + (t - 1) * width,
+              x -> keys + i * width,
+              width
+            );
+            child -> key_counts[t - 1] = x -> key_counts[i];
+            child -> n += right_n + 1;
+            /*
+             * Since node x is losing key i and child pointer i, move keys i + 1
+             * to n - 1 and children i + 2 to n left by one position in this
+             * node.
+             *     i        n = 6     length = n - 1 - i = 6 - 1 - 2 = 3
+             * 0 1 2 3 4 5
+             * A B C D E F
+             *       \---/
+             */
+            memmove(
+              x -> keys + i * width,
+              x -> keys + (i + 1) * width,
+              (x -> n - 1 - i) * width
+            );
+            memmove(
+              x -> key_counts + i,
+              x -> key_counts + i + 1,
+              (x -> n - 1 - i) * sizeof(int)
+            );
+            if (!x -> is_leaf) {
+              memmove(
+                x -> children + i + 1,
+                x -> children + i + 2,
+                (x -> n + 1 - 1 - i) * sizeof(struct _BTreeNode*)
+              );
+            }
+            x -> n -= 1;
+            _b_tree_node_deinit(right_sibling);
+          }
         }
       }
     }
