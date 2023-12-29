@@ -83,7 +83,7 @@ static struct _BTreeNode* _b_tree_node_init(int t, int element_size) {
   if ((node -> keys = malloc((2 * t - 1) * element_size)) == NULL) {
     return NULL;
   }
-  if ((node -> key_counts = malloc((2 * t - 1) * element_size)) == NULL) {
+  if ((node -> key_counts = calloc((2 * t - 1), sizeof(int))) == NULL) {
     return NULL;
   }
   return node;
@@ -146,7 +146,7 @@ static void _b_tree_split_child(struct _BTreeNode* x, int t, int i, int width) {
    */
   memmove(z -> keys, y -> keys + t * width, (t - 1) * width);
   /* Move the corresponding key_counts */
-  memmove(z -> key_counts, y -> key_counts + t * width, (t - 1) * width);
+  memmove(z -> key_counts, y -> key_counts + t * width, (t - 1) * sizeof(int));
   /* Movie t largest children from y to z */
   if (!y -> is_leaf) {
     memmove(z -> children, y -> children + t, t * sizeof(struct _BTreeNode*));
@@ -211,7 +211,12 @@ static void _b_tree_insert_nonfull(
       x -> keys + (i + 2) * width,
       x -> keys + (i + 1) * width,
       (x -> n - i - 1) * width
-    );/* FIXME: May need move key_counts also ? */
+    );
+    memmove(
+      x -> key_counts + i + 2,
+      x -> key_counts + i + 1,
+      (x -> n - i - 1) * sizeof(int)
+    );
     /*
      * Now keys[i+1] is the right place for k,
      */
