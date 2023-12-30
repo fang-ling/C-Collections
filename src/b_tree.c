@@ -221,6 +221,7 @@ static void _b_tree_insert_nonfull(
      * Now keys[i+1] is the right place for k,
      */
     memcpy(x -> keys + (i + 1) * width, k, width);
+    x -> key_counts[i + 1] = 1;
     x -> n += 1;
   } else {
     i += 1;
@@ -228,7 +229,7 @@ static void _b_tree_insert_nonfull(
     if (x -> children[i] -> n == 2 * t - 1) {
       _b_tree_split_child(x, t, i, width);
       /* does key k go into child i or child i+1? */
-      if (compare(k, x -> keys + i * width)) {
+      if (compare(k, x -> keys + i * width) > 0) {
         i += 1;
       }
     }
@@ -317,10 +318,11 @@ static void _b_tree_remove_from_subtree(
       if (y -> n >= t) { /* Case 2a: y has at least t keys. */
         var y_pre = _b_tree_predecessor(y);
         var k_prime = malloc(width);
-        /* FIXME: copy key_count */
         memcpy(k_prime, y_pre -> keys + (y_pre -> n - 1) * width, width);
+        var k_count_prime = y_pre -> key_counts[y_pre -> n - 1];
         _b_tree_remove_from_subtree(y, k_prime, t, width, compare);
         memcpy(x -> keys + i * width, k_prime, width);
+        x -> key_counts[i] = k_count_prime;
         free(k_prime);
       } else { /* y has fewer than t keys */
         var z = x -> children[i + 1];
@@ -329,10 +331,11 @@ static void _b_tree_remove_from_subtree(
           /* Case 2b: z has at least t keys. Symmetric to case 2a. */
           var z_suc = _b_tree_successor(z);
           var k_prime = malloc(width);
-          /* FIXME: copy key_count */
           memcpy(k_prime, z_suc -> keys + 0 * width, width);
+          var k_count_prime = z_suc -> key_counts[0];
           _b_tree_remove_from_subtree(z, k_prime, t, width, compare);
           memcpy(x -> keys + i * width, k_prime, width);
+          x -> key_counts[i] = k_count_prime;
           free(k_prime);
         } else {
           /*
@@ -346,7 +349,11 @@ static void _b_tree_remove_from_subtree(
           y -> key_counts[y -> n] = x -> key_counts[i];
           /* merge z into y */
           memmove(y -> keys + (y -> n + 1) * width, z -> keys, z -> n * width);
-          memmove(y -> key_counts + y -> n + 1, z -> key_counts, z -> n * width);
+          memmove(
+            y -> key_counts + y -> n + 1,
+            z -> key_counts,
+            z -> n * sizeof(int)
+          );
           /* If y and z are not leaves, copy z's child pointers. */
           if (!y -> is_leaf) {
             memmove(
@@ -367,6 +374,11 @@ static void _b_tree_remove_from_subtree(
             x -> keys + i * width,
             x -> keys + (i + 1) * width,
             (x -> n - i - 1) * width
+          );
+          memmove(
+            x -> key_counts + i,
+            x -> key_counts + i + 1,
+            (x -> n - i - 1) * sizeof(int)
           );
           /* FIXME: May miscalculate the move length? */
           memmove(
@@ -408,7 +420,7 @@ static void _b_tree_remove_from_subtree(
         memmove(
           child -> children + 1,
           child -> children,
-          (child -> n + 1) * width
+          (child -> n + 1) * sizeof(struct _BTreeNode*)
         );
         child -> n += 1;
         /* Move a key from x into child */
@@ -487,7 +499,7 @@ static void _b_tree_remove_from_subtree(
            */
           if (left_n > 0) {
             /*
-             * The child has a left sibling. Merge the child with the left 
+             * The child has a left sibling. Merge the child with the left
              * sibling.
              */
             /* Move everything in child right by t positions. */
@@ -530,7 +542,7 @@ static void _b_tree_remove_from_subtree(
             );
             child -> key_counts[i - 1] = x -> key_counts[i - 1];
             child -> n += left_n + 1;
-            /* 
+            /*
              * Since node x is losing key i - 1 and child pointer i - 1, move
              * keys i to n - 1 and children i to n left by one position.
              *
@@ -619,6 +631,7 @@ static void _b_tree_remove_from_subtree(
         }
       }
     }
+    _b_tree_remove_from_subtree(old_child, k, t, width, compare);
   }
 }
 
