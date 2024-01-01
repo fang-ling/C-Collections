@@ -654,6 +654,26 @@ struct _BTreeNode {
   b_tree_deinit(&tree);
 }
 
+-(void) test_b_tree2 {
+  struct BTree tree;
+  b_tree_init(&tree, 2, sizeof(char), char_compare);
+
+  char keys[] = "FSQKCLHTVWMRNPABXYDZE";
+  var count = strlen(keys);
+
+  for (var _ = 0; _ < 5; _ += 1) {
+    for (var i = 0; i < count; i += 1) {
+      b_tree_insert(&tree, &keys[i]);
+    }
+  }
+
+  for (var i = 0; i < count; i += 1) {
+    b_tree_remove(&tree, &keys[i]);
+  }
+
+  b_tree_deinit(&tree);
+}
+
 @end
 
 //

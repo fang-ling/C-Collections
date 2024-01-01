@@ -750,6 +750,24 @@ bool b_tree_contains(struct BTree* tree, void* key) {
   return true;
 }
 
+/* MARK: - Removing Elements */
+
+/* Removes the given element in the collection. */
+void b_tree_remove(struct BTree* tree, void* key) {
+  /* FIXME: Update count & is_empty */
+  _b_tree_remove_from_subtree(
+    (*tree).root,
+    key,
+    (*tree).t,
+    (*tree).element_size,
+    (*tree).compare
+  );
+  /* Update root when root is an internal node with no keys. */
+  if (!(*tree).root -> is_leaf && (*tree).root -> n == 0) {
+    (*tree).root = (*tree).root -> children[0];
+  }
+}
+
 /*===----------------------------------------------------------------------===*/
 /*             ___                            ___                             */
 /*           /'___\                          /\_ \    __                      */
