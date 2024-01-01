@@ -194,10 +194,6 @@ static void _b_tree_insert_nonfull(
   var i = lower_bound(k, x -> keys, x -> n, width, compare) - 1;
   if (x -> is_leaf) {
     /* The case in which x is a leaf node. Insert key k into x directly. */
-    if (compare(k, x -> keys + i * width) == 0) { /* Insert a duplicate key */
-      x -> key_counts[i] += 1;
-      return;
-    }
     /* 
      * Move keys[i+1..<n] to keys[i+2...n], make room for new k.
      * Example: k = 'D', we get i = 1.
@@ -237,6 +233,29 @@ static void _b_tree_insert_nonfull(
   }
 }
 
+static struct _BTreeNode* _b_tree_search(
+  struct _BTreeNode* x,
+  void* k,
+  int width,
+  int* result_i,
+  int (*compare)(const void*, const void*)
+) {
+  if (x -> n < 1) { /* Empty subtree */
+    return NULL;
+  }
+  var i = lower_bound(k, x -> keys, x -> n, width, compare);
+
+  if (i < x -> n && compare(k, x -> keys + i * width) == 0) {
+    *result_i = i;
+    return x;
+  } else if (x -> is_leaf) {
+    *result_i = -1;
+    return NULL;
+  } else {
+    return _b_tree_search(x -> children[i], k, width, result_i, compare);
+  }
+}
+
 /*
  * We insert a key k into a B-tree T of height h in a single pass down the tree.
  * The _b_tree_insert procedure uses _b_tree_split_child to guarantee that the
@@ -250,6 +269,13 @@ static void _b_tree_insert(
   int (*compare)(const void*, const void*)
 ) {
   var r = *root;
+  /* Before split child, check duplicate key */
+  var i = 0;
+  struct _BTreeNode* dup;
+  if ((dup = _b_tree_search(r, k, width, &i, compare)) != NULL) {
+    dup -> key_counts[i] += 1;
+    return;
+  }
   if (r -> n == 2 * t - 1) {
     /* s will be the new root */
     var s = _b_tree_node_init(t, width);
@@ -632,39 +658,6 @@ static void _b_tree_remove_from_subtree(
       }
     }
     _b_tree_remove_from_subtree(old_child, k, t, width, compare);
-  }
-}
-
-static struct _BTreeNode* _b_tree_search(
-  struct _BTreeNode* x,
-  void* k,
-  int width,
-  int* result_i,
-  int (*compare)(const void*, const void*)
-) {
-  var i = 0;
-  var low = 0;
-  var high = x -> n - 1;
-  while (low <= high) {
-    var mid = (low + high) / 2;
-    if (compare(k, x -> keys + mid * width) == 0) {
-      break;
-    } else if (compare(k, x -> keys + mid * width) > 0) {
-      low = mid + 1;
-    } else {
-      high = mid - 1;
-    }
-    i = mid;
-  }
-
-  if (i < x -> n && compare(k, x -> keys + i * width) == 0) {
-    *result_i = i;
-    return x;
-  } else if (x -> is_leaf) {
-    *result_i = -1;
-    return NULL;
-  } else {
-    return _b_tree_search(x -> children[i], k, width, result_i, compare);
   }
 }
 
