@@ -44,6 +44,6 @@ void b_tree_insert(struct BTree* tree, void* key);
 bool b_tree_contains(struct BTree* tree, void* key);
 
 /* Removes the given element in the collection. */
-void b_tree_remove(struct BTree* tree, void* key);
+int b_tree_remove(struct BTree* tree, void* key);
 
 #endif /* b_tree_h */

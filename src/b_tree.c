@@ -4,7 +4,7 @@
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
 /* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 15, 2023                               \ \_\/\_\/\____\/\_\ */
+/* Date: January 2, 2024                                 \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -30,6 +30,7 @@
  * Error code of BTree:
  * 0: NO ERROR
  * 1: due to malloc, check `errno`
+ * 2: No such element in the collection
  */
 
 /*
@@ -314,10 +315,6 @@ static void _b_tree_remove_from_subtree(
   var i = lower_bound(k, x -> keys, x -> n, width, compare);
   /* k is in node x */
   if (i < x -> n && compare(k, x -> keys + i * width) == 0) {
-    if (x -> key_counts[i] > 1) { /* delete dupicate element */
-      x -> key_counts[i] -= 1;
-      return;
-    }
     /*
      * Case 1: Delete key k from node x which is a leaf. Do nothing if node x
      * does not contain key k.
@@ -562,11 +559,11 @@ static void _b_tree_remove_from_subtree(
             }
             /* Move k down from node x into child. */
             memcpy(
-              child -> keys + (i - 1) * width,
+              child -> keys + (t - 1) * width,
               x -> keys + (i - 1) + width,
               width
             );
-            child -> key_counts[i - 1] = x -> key_counts[i - 1];
+            child -> key_counts[t - 1] = x -> key_counts[i - 1];
             child -> n += left_n + 1;
             /*
              * Since node x is losing key i - 1 and child pointer i - 1, move
@@ -715,7 +712,6 @@ void b_tree_deinit(struct BTree* tree) {
 
 /* Adds a new element in the B-Tree. */
 void b_tree_insert(struct BTree* tree, void* key) {
-  /* FIXME: update count & is_empty */
   _b_tree_insert(
     &(*tree).root,
     key,
@@ -723,6 +719,8 @@ void b_tree_insert(struct BTree* tree, void* key) {
     (*tree).element_size,
     (*tree).compare
   );
+  (*tree).is_empty = false;
+  (*tree).count += 1;
 }
 
 /* MARK: - Finding Elements */
@@ -746,8 +744,30 @@ bool b_tree_contains(struct BTree* tree, void* key) {
 /* MARK: - Removing Elements */
 
 /* Removes the given element in the collection. */
-void b_tree_remove(struct BTree* tree, void* key) {
-  /* FIXME: Update count & is_empty */
+int b_tree_remove(struct BTree* tree, void* key) {
+  if ((*tree).is_empty) {
+    return 2;
+  }
+
+  var i = 0;
+  struct _BTreeNode* dup;
+  /* delete dupicate element */
+  if ((dup = _b_tree_search(
+    (*tree).root,
+    key,
+    (*tree).element_size,
+    &i,
+    (*tree).compare)) != NULL
+  ) {
+    dup -> key_counts[i] -= 1;
+    if (dup -> key_counts[i] > 1 - 1) {
+      return 0;
+    }
+  } else {
+    /* No such key */
+    return 2;
+  }
+
   _b_tree_remove_from_subtree(
     (*tree).root,
     key,
@@ -759,6 +779,12 @@ void b_tree_remove(struct BTree* tree, void* key) {
   if (!(*tree).root -> is_leaf && (*tree).root -> n == 0) {
     (*tree).root = (*tree).root -> children[0];
   }
+
+  (*tree).count -= 1;
+  if ((*tree).count == 0) {
+    (*tree).is_empty = true;
+  }
+  return 0;
 }
 
 /*===----------------------------------------------------------------------===*/

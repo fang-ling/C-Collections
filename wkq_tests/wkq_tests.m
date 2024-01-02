@@ -737,10 +737,341 @@ struct _BTreeNode {
   }
   XCTAssertEqual(((int*)tree.root->children[2]->children[2]->key_counts)[0], 6);
 
-//  for (var i = 0; i < count; i += 1) {
-//    b_tree_remove(&tree, &keys[i]);
-//  }
+  for (var _ = 0; _ < 4; _ += 1) {
+    for (var i = 0; i < count; i += 1) {
+      b_tree_remove(&tree, &keys[i]);
+    }
+  }
+  b_tree_remove(&tree, &keys[count - 1]); /* Remove E */
+  b_tree_remove(&tree, &keys[7]); /* Remove T */
+  b_tree_remove(&tree, &keys[16]); /* Remove X */
 
+  /* Remove Z */
+  /*
+   *                    KQ
+   *        BF           M            TW
+   *     A CDE H     L      NP     RS  V  XY
+   */
+  char key = 'Z';
+  b_tree_remove(&tree, &key);
+  XCTAssertEqual(memcmp(tree.root->keys, "KQ", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->keys, "BF", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->keys, "M", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->keys, "TW", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[0]->keys, "A", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[1]->keys, "CDE", 3 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[2]->keys, "H", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[0]->keys, "L", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[1]->keys, "NP", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[0]->keys, "RS", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[1]->keys, "V", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[2]->keys, "XY", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[2]->key_counts)[i], 1);
+  }
+
+  /* Remove K */
+  /*
+   *                    HQ
+   *        BE          M            TW
+   *     A CD  F     L     NP     RS  V  XY
+   */
+  key = 'K';
+  b_tree_remove(&tree, &key);
+  XCTAssertEqual(memcmp(tree.root->keys, "HQ", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->keys, "BE", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->keys, "M", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->keys, "TW", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[0]->keys, "A", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[1]->keys, "CD", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[2]->keys, "F", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[0]->keys, "L", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[1]->keys, "NP", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[0]->keys, "RS", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[1]->keys, "V", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[2]->keys, "XY", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[2]->key_counts)[i], 1);
+  }
+
+  /* Remove A */
+  /*
+   *                    HQ
+   *        CE          M            TW
+   *     B  D  F     L     NP     RS  V  XY
+   */
+  key = 'A';
+  b_tree_remove(&tree, &key);
+  XCTAssertEqual(memcmp(tree.root->keys, "HQ", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->keys, "CE", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->keys, "M", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->keys, "TW", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[0]->keys, "B", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[1]->keys, "D", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[2]->keys, "F", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[0]->keys, "L", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[1]->keys, "NP", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[0]->keys, "RS", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[1]->keys, "V", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[2]->keys, "XY", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[2]->key_counts)[i], 1);
+  }
+
+  /* Remove M */
+  /*
+   *                    EQ
+   *        C           HN            TW
+   *     B    D      F  L   P     RS  V  XY
+   */
+  key = 'M';
+  b_tree_remove(&tree, &key);
+  XCTAssertEqual(memcmp(tree.root->keys, "EQ", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->keys, "C", tree.root->children[0]->n * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->keys, "HN", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->keys, "TW", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[0]->keys, "B", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[0]->children[1]->keys, "D", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[0]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[0]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[0]->keys, "F", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[1]->keys, "L", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[1]->children[2]->keys, "P", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[1]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[1]->children[2]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[0]->keys, "RS", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[0]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[0]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[1]->keys, "V", 1 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[1]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[1]->key_counts)[i], 1);
+  }
+
+  XCTAssertEqual(memcmp(tree.root->children[2]->children[2]->keys, "XY", 2 * sizeof(char)), 0);
+  for (var i = 0; i < tree.root->children[2]->children[2]->n; i += 1) {
+    XCTAssertEqual(((int*)tree.root->children[2]->children[2]->key_counts)[i], 1);
+  }
+  /*
+   *                    F R
+   *        C            N            TW
+   *     B    D        HL   P      S  V  XY
+   *
+   *                    R
+   *         FN                  TW
+   *     BD  HL   P            S  V  XY
+   *
+   *                    R
+   *         FN                  TW
+   *     BD  L   P            S  V  XY
+   *
+   *                    R
+   *         F                  TW
+   *      BD   LP            S  V  XY
+   *
+   *                    R
+   *         F                  W
+   *      BD   LP            SV  XY
+   *
+   *               FRV
+   *      BD   LP        S  XY
+   *
+   *               FRV
+   *      D   LP        S  XY
+   *
+   *               RV
+   *         LP        S  XY
+   *
+   *               RV
+   *         P        S  XY
+   *
+   *               SX
+   *         R      V     Y
+   *
+   *               V
+   *         S          XY
+   *
+   *               X
+   *             V   Y
+   *
+   *             VY
+   *
+   *             V
+   *
+   *             ø
+   */
+  char keys2[] = "EQCHNTBDFLPRSXYV";
+  for (var i = 0; i < strlen(keys2); i += 1) {
+    b_tree_remove(&tree, &keys2[i]);
+  }
+  key = 'W';
+  b_tree_remove(&tree, &key);
+  
   b_tree_deinit(&tree);
 }
 
