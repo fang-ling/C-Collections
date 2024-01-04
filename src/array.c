@@ -3,8 +3,8 @@
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.5                                         \ \ \_/__ \_\ \_  __  */
-/* Date: December 20, 2023                               \ \_\/\_\/\____\/\_\ */
+/* Version: 1.6                                         \ \ \_/__ \_\ \_  __  */
+/* Date: January 4, 2024                                 \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -172,6 +172,50 @@ int array_append(struct Array* array, void* element) {
   array_set(array, (*array).count - 1, element);
   
   return 0;
+}
+
+/* 
+ * Inserts a new element at the specified position.
+ *
+ * - Complexity:
+ *   O(n), where n is the length of the array.
+ */
+int array_insert(struct Array* array, void* element, int i) {
+  if (i == (*array).count) { /* this method is equivalent to append(_:) */
+    return array_append(array, element);
+  }
+  var err = _check_index(array, i);
+  if (err != 0) {
+    return err;
+  }
+  /* Dumb append to make room for the new element. Update is_empty & count. */
+  if ((err = array_append(array, element)) != 0) {
+    return err;
+  }
+  /*
+   * [1, 2, 3, 4, 5]  <----- insert(100, at: 3)
+   *
+   *  0  1  2  3  4    5
+   * [1, 2, 3, 4, 5, 100]  <---- after append, count = 6
+   *           \--/  <---- shift right by one (i ..< count - 1)
+   *                                          (move length = count - 1 - i)
+   *
+   * Then copy new_element at index 3.
+   *
+   *    0  1  2    3  4  5
+   * = [1, 2, 3, 100, 4, 5]
+   */
+  memmove(
+    (*array)._storage + (i + 1) * (*array).element_size,
+    (*array)._storage + i * (*array).element_size,
+    ((*array).count - 1 - i) * (*array).element_size
+  );
+  memcpy(
+    (*array)._storage + i * (*array).element_size,
+    element,
+    (*array).element_size
+  );
+  return err;
 }
 
 /* MARK: - Removing Elements */

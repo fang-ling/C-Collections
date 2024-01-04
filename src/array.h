@@ -55,6 +55,14 @@ int array_set(struct Array* array, int index, void* element);
 /* Adds a new element at the end of the array. */
 int array_append(struct Array* array, void* element);
 
+/*
+ * Inserts a new element at the specified position.
+ *
+ * - Complexity:
+ *   O(n), where n is the length of the array.
+ */
+int array_insert(struct Array* array, void* element, int i);
+
 /* Removes the last element of the collection. */
 int array_remove_last(struct Array* array);
 

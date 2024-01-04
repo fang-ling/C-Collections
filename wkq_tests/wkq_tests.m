@@ -272,6 +272,40 @@ bool int_equal(const void* a, const void* b) {
   array_deinit(&rhs);
 }
 
+- (void)test_insert {
+  int buf[] = {19358, 19358, 19358, 100, 19358, 19358, 200};
+  var delta = 19358;
+  struct Array array;
+  array_init(&array, sizeof(int));
+  for (var i = 0; i < 5; i += 1) {
+    array_append(&array, &delta);
+  }
+
+  delta = 100ll;
+  array_insert(&array, &delta, 3);
+  delta = 200ll;
+  array_insert(&array, &delta, array.count);
+  for (var i = 0; i < array.count; i += 1) {
+    XCTAssertEqual(((int*)array._storage)[i], buf[i]);
+  }
+
+  array_remove_all(&array);
+
+  array_insert(&array, &delta, 0);
+  XCTAssertEqual(((int*)array._storage)[0], delta);
+
+  array_remove_all(&array);
+
+  for (var i = 0; i < 7; i += 1) {
+    array_insert(&array, &buf[i], 0);
+  }
+  for (int i = array.count - 1; i >= 0; i -= 1) {
+    XCTAssertEqual(((int*)array._storage)[array.count - 1 - i], buf[i]);
+  }
+
+  array_deinit(&array);
+}
+
 // MARK: - sort
 
 int compare(const void* a, const void* b) {
@@ -1132,36 +1166,6 @@ struct _BTreeNode {
 //     return true;
 // }
 //
-// static Bool test_insert(void) {
-//     Int buf[] = {19358ll, 19358ll, 19358ll, 100ll, 19358ll, 19358ll, 200ll};
-//     var delta = 19358ll;
-//     var array = array_init3(sizeof(Int), &delta, 5);
-//
-//     delta = 100ll;
-//     array_insert(array, 3, &delta);
-//     delta = 200ll;
-//     array_insert(array, array -> count, &delta);
-//     expect_equal_elements(array -> data, buf, 7, sizeof(Int), int_equal);
-//
-//     array_deinit(array);
-//
-//     array = array_init(sizeof(Int));
-//     array_insert(array, 0, &delta);
-//     expect_equal(array_get(array, 0), &delta, int_equal);
-//
-//     array_deinit(array);
-//
-//     array = array_init(sizeof(Int));
-//     for (var i = 0; i < 7; i += 1) {
-//         array_insert(array, 0, &buf[i]);
-//     }
-//     for (int i = 6; i >= 0; i -= 1) {
-//         expect_equal(&buf[i], array_get(array, 6 - i), int_equal);
-//     }
-//
-//     array_deinit(array);
-//     return true;
-// }
 //
 // static Bool test_append_big(void) {
 //     var c = 128ll;
