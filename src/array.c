@@ -245,6 +245,41 @@ int array_remove_last(struct Array* array) {
   return 0;
 }
 
+/* 
+ * Removes the element at the specified position.
+ *
+ * - Complexity:
+ *   O(n), where n is the length of the array.
+ */
+int array_remove_at(struct Array* array, int i) {
+  var err = 0;
+  if ((err = _check_index(array, i)) != 0) {
+    return err;
+  }
+
+  if (i == (*array).count - 1) {
+    return array_remove_last(array);
+  }
+
+  /*
+   *    0    1    2    3    4    5    6
+   * [1.1, 1.5, 2.9, 1.2, 1.5, 1.3, 1.2]   <---  remove(at: 2)
+   *                 \----------------/  <---  shift left by one (i+1 ..< count)
+   *                                     <--- move length = count - i - 1
+   * [1.1, 1.5, 1.2, 1.5, 1.3, 1.2, 1.2]
+   *
+   * then, call remove_last()
+   *
+   * [1.1, 1.5, 1.2, 1.5, 1.3, 1.2]
+   */
+  memmove(
+    (*array)._storage + i * (*array).element_size,
+    (*array)._storage + (i + 1) * (*array).element_size,
+    ((*array).count - i - 1) * (*array).element_size
+  );
+  return array_remove_last(array);
+}
+
 /* Removes all the elements. */
 int array_remove_all(struct Array* array) {
   free((*array)._storage);

@@ -306,6 +306,48 @@ bool int_equal(const void* a, const void* b) {
   array_deinit(&array);
 }
 
+- (void)test_array_remove_at {
+  struct Array array;
+  array_init(&array, sizeof(double));
+
+  double buf[] = {1.1, 1.5, 2.9, 1.2, 1.5, 1.3, 1.2};
+  for (var i = 0; i < 7; i += 1) {
+    array_append(&array, &buf[i]);
+  }
+
+  double buf2[] = {1.1, 1.5, 1.2, 1.5, 1.3, 1.2};
+  array_remove_at(&array, 2);
+  for (var i = 0; i < array.count; i += 1) {
+    XCTAssertEqual(((double*)array._storage)[i], buf2[i]);
+  }
+
+  double buf3[] = {1.1, 1.5, 1.2, 1.5, 1.2};
+  array_remove_at(&array, 4);
+  for (var i = 0; i < array.count; i += 1) {
+    XCTAssertEqual(((double*)array._storage)[i], buf3[i]);
+  }
+
+  double buf4[] = {1.1, 1.5, 1.2, 1.5};
+  array_remove_at(&array, 4);
+  for (var i = 0; i < array.count; i += 1) {
+    XCTAssertEqual(((double*)array._storage)[i], buf4[i]);
+  }
+
+  double buf5[] = {1.5, 1.2, 1.5, 1.2};
+  array_remove_at(&array, 0);
+  for (var i = 0; i < array.count; i += 1) {
+    XCTAssertEqual(((double*)array._storage)[i], buf5[i]);
+  }
+
+  for (var _ = 0; _ < 4; _ += 1) {
+    array_remove_at(&array, 0);
+  }
+  XCTAssertEqual(array.count, 0);
+  XCTAssertTrue(array.is_empty);
+
+  array_deinit(&array);
+}
+
 // MARK: - sort
 
 int compare(const void* a, const void* b) {

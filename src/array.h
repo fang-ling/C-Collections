@@ -66,6 +66,14 @@ int array_insert(struct Array* array, void* element, int i);
 /* Removes the last element of the collection. */
 int array_remove_last(struct Array* array);
 
+/*
+ * Removes the element at the specified position.
+ *
+ * - Complexity:
+ *   O(n), where n is the length of the array.
+ */
+int array_remove_at(struct Array* array, int i);
+
 /* Removes all the elements. */
 int array_remove_all(struct Array* array);
 
