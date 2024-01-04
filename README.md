@@ -11,7 +11,8 @@ Objective-C codes are only for Xcode unit tests (`xctest`).
 
 ## Contents
 
-- `Array` [`v1.5`] An ordered, random-access collection.
+- `Array` [`v1.6`] An ordered, random-access collection.
+- `BTree` [`v1.0-beta`] An efficient in-memory B-tree implementation, suitable for use as a bag, a set, or a dictionary.
 - `Deque` [`v1.1`] A double-ended queue backed by a ring buffer. Deques are random-access collections that allows fast insertion and deletion at both its beginning and its end.
 
 - `binary_search()` [`v1.1`] An efficient algorithm used to quickly locate a specific target value within a sorted collection.
