@@ -602,7 +602,7 @@ struct _BTreeNode {
 - (void)test_b_tree {
 
   struct BTree tree;
-  b_tree_init(&tree, 2, sizeof(char), char_compare); /* 2-3-4 Tree */
+  b_tree_init(&tree, 2, sizeof(char), true, char_compare); /* 2-3-4 Tree */
 
   /* Insert F */
   var c = (char)'F';
@@ -732,7 +732,7 @@ struct _BTreeNode {
 
 -(void) test_b_tree2 {
   struct BTree tree;
-  b_tree_init(&tree, 2, sizeof(char), char_compare);
+  b_tree_init(&tree, 2, sizeof(char), true, char_compare);
 
   char keys[] = "FSQKCLHTVWMRNPABXYDZE";
   var count = strlen(keys);

@@ -4,7 +4,7 @@
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
 /* Version: 1.0                                         \ \ \_/__ \_\ \_  __  */
-/* Date: January 2, 2024                                 \ \_\/\_\/\____\/\_\ */
+/* Date: January 18, 2024                                \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
@@ -262,11 +262,12 @@ static struct _BTreeNode* _b_tree_search(
  * The _b_tree_insert procedure uses _b_tree_split_child to guarantee that the
  * recursion never descends to a full node.
  */
-static void _b_tree_insert(
+static bool _b_tree_insert(
   struct _BTreeNode** root, /* We are modifying of value of root! */
   void* k,
   int t,
   int width,
+  bool allow_duplicates,
   int (*compare)(const void*, const void*)
 ) {
   var r = *root;
@@ -274,8 +275,11 @@ static void _b_tree_insert(
   var i = 0;
   struct _BTreeNode* dup;
   if ((dup = _b_tree_search(r, k, width, &i, compare)) != NULL) {
+    if (!allow_duplicates) {
+      return false;
+    }
     dup -> key_counts[i] += 1;
-    return;
+    return true;
   }
   if (r -> n == 2 * t - 1) {
     /* s will be the new root */
@@ -288,6 +292,7 @@ static void _b_tree_insert(
   } else {
     _b_tree_insert_nonfull(r, k, t, width, compare);
   }
+  return true;
 }
 
 static struct _BTreeNode* _b_tree_predecessor(struct _BTreeNode* x) {
@@ -672,6 +677,8 @@ struct BTree {
 
   /* A Boolean value indicating whether or not the array is empty. */
   bool is_empty;
+  /* A Boolean value indicating whether a B-tree allows duplicate elements. */
+  bool allow_duplicates;
 };
 
 /* MARK: - Creating and Destroying a B-Tree */
@@ -681,11 +688,13 @@ void b_tree_init(
   struct BTree* tree,
   int t,
   int element_size,
+  bool allow_duplicates,
   int (*compare)(const void*, const void*)
 ) {
   (*tree).root = _b_tree_node_init(t, element_size);
   (*tree).t = t;
   (*tree).element_size = element_size;
+  (*tree).allow_duplicates = allow_duplicates;
   (*tree).compare = compare;
 
   (*tree).count = 0;
@@ -711,20 +720,28 @@ void b_tree_deinit(struct BTree* tree) {
 /* MARK: - Adding Elements */
 
 /* Adds a new element in the B-Tree. */
-void b_tree_insert(struct BTree* tree, void* key) {
-  _b_tree_insert(
+bool b_tree_insert(struct BTree* tree, void* key) {
+  if (_b_tree_insert(
     &(*tree).root,
     key,
     (*tree).t,
     (*tree).element_size,
+    (*tree).allow_duplicates,
     (*tree).compare
-  );
-  (*tree).is_empty = false;
-  (*tree).count += 1;
+  )) {
+    (*tree).is_empty = false;
+    (*tree).count += 1;
+    return true;
+  }
+  return false;
 }
 
 /* MARK: - Finding Elements */
 
+/*
+ * Returns a Boolean value indicating whether the tree contains the given
+ * element.
+ */
 bool b_tree_contains(struct BTree* tree, void* key) {
   var i = 0;
   if (
@@ -737,6 +754,81 @@ bool b_tree_contains(struct BTree* tree, void* key) {
     ) == NULL
   ) {
     return false;
+  }
+  return true;
+}
+
+static struct _BTreeNode* _b_tree_minimum(struct _BTreeNode* x) {
+  while (x -> n > 0 && x -> children[0] != NULL) {
+    x = x -> children[0];
+  }
+  return x;
+}
+
+/* Returns the element with the smallest value, if available. */
+bool b_tree_min(struct BTree* tree, void* result) {
+  if ((*tree).is_empty) {
+    return false;
+  }
+  var x = _b_tree_minimum((*tree).root);
+  memcpy(result, x -> keys, (*tree).element_size);
+  return true;
+}
+
+bool b_tree_predecessor(struct BTree* tree, void* key, void* result) {
+  var i = 0;
+  var key_node = _b_tree_search(
+    (*tree).root,
+    key,
+    (*tree).element_size,
+    &i,
+    (*tree).compare
+  );
+  var pred = _b_tree_predecessor(key_node);
+  if (pred == key_node) { /* Same leaf node */
+    if (i - 1 < 0) {
+      return false;
+    }
+    memcpy(
+      result,
+      pred -> keys + (i - 1) * (*tree).element_size,
+      (*tree).element_size
+    );
+  } else {
+    memcpy(
+      result,
+      pred -> keys + (pred -> n - 1) * (*tree).element_size,
+      (*tree).element_size
+    );
+  }
+  return true;
+}
+
+bool b_tree_successor(struct BTree* tree, void* key, void* result) {
+  var i = 0;
+  var key_node = _b_tree_search(
+    (*tree).root,
+    key,
+    (*tree).element_size,
+    &i,
+    (*tree).compare
+  );
+  var succ = _b_tree_successor(key_node);
+  if (succ == key_node) {
+    if (i + 1 > succ -> n - 1) {
+      return false;
+    }
+    memcpy(
+      result,
+      succ -> keys + (i + 1) * (*tree).element_size,
+      (*tree).element_size
+    );
+  } else {
+    memcpy(
+      result,
+      succ -> keys,
+      (*tree).element_size
+    );
   }
   return true;
 }
