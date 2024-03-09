@@ -12,6 +12,7 @@
 
 #import "array.h"
 #import "b_tree.h"
+#import "binary_heap.h"
 #import "deque.h"
 
 #import "binary_search.h"
@@ -367,6 +368,129 @@ int compare(const void* a, const void* b) {
   for (var i = 0; i < 7; i += 1) {
     XCTAssertEqual(array[i], result[i]);
   }
+}
+
+// MARK: - BinaryHeap
+
+- (void)test_binary_heap_remove {
+  struct BinaryHeap heap;
+  binary_heap_init(&heap, sizeof(int), compare);
+  
+  var x = 19358;
+  binary_heap_insert(&heap, &x);
+  var ret = 0;
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 19358);
+  
+  x = 12;
+  binary_heap_insert(&heap, &x);
+  x = 9;
+  binary_heap_insert(&heap, &x);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 12);
+  
+  x = 13;
+  binary_heap_insert(&heap, &x);
+  x = 1;
+  binary_heap_insert(&heap, &x);
+  x = 4;
+  binary_heap_insert(&heap, &x);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 13);
+  
+  int input[] = {1, 3, 4, 2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+  for (var i = 0; i < 20; i += 1) {
+    binary_heap_insert(&heap, &input[i]);
+  }
+  
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 20);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 19);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 18);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 17);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 16);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 15);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 14);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 13);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 12);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 11);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 10);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 9);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  /* One 9 was still in the heap from before */
+  XCTAssertEqual(ret, 9);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 8);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 7);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 6);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 5);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 4);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  /* One 4 was still in the heap from before */
+  XCTAssertEqual(ret, 4);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 3);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 2);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  XCTAssertEqual(ret, 1);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  /* One 1 was still in the heap from before */
+  XCTAssertEqual(ret, 1);
+  binary_heap_max(&heap, &ret);
+  binary_heap_remove_max(&heap);
+  
+  XCTAssertEqual(heap.count, 0);
+  
+  binary_heap_deinit(&heap);
+}
+
+- (void)test_binary_heap_is_empty {
+  struct BinaryHeap heap;
+  binary_heap_init(&heap, sizeof(int), compare);
+  
+  binary_heap_deinit(&heap);
 }
 
 // MARK: - deque
