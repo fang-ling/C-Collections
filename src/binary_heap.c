@@ -100,8 +100,8 @@ static void max_heapify_down(struct BinaryHeap* heap, int i) {
    */
   if ( /* _storage[i] < _storage[j]) */
     (*heap).compare(
-      (*heap)._storage._storage + PARENT(i) * (*heap).element_size,
-      (*heap)._storage._storage + i * (*heap).element_size
+      (*heap)._storage._storage + i * (*heap).element_size,
+      (*heap)._storage._storage + j * (*heap).element_size
     ) <= 0
   ) {
     array_swap_at(&(*heap)._storage, i, j);

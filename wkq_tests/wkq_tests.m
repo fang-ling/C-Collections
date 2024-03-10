@@ -382,6 +382,8 @@ int compare(const void* a, const void* b) {
   binary_heap_max(&heap, &ret);
   binary_heap_remove_max(&heap);
   XCTAssertEqual(ret, 19358);
+  XCTAssertTrue(heap.is_empty);
+  XCTAssertEqual(heap.count, 0);
   
   x = 12;
   binary_heap_insert(&heap, &x);
@@ -390,6 +392,7 @@ int compare(const void* a, const void* b) {
   binary_heap_max(&heap, &ret);
   binary_heap_remove_max(&heap);
   XCTAssertEqual(ret, 12);
+  XCTAssertEqual(heap.count, 1);
   
   x = 13;
   binary_heap_insert(&heap, &x);
@@ -400,12 +403,12 @@ int compare(const void* a, const void* b) {
   binary_heap_max(&heap, &ret);
   binary_heap_remove_max(&heap);
   XCTAssertEqual(ret, 13);
+  XCTAssertEqual(heap.count, 3);
   
   int input[] = {1, 3, 4, 2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   for (var i = 0; i < 20; i += 1) {
     binary_heap_insert(&heap, &input[i]);
   }
-  
   binary_heap_max(&heap, &ret);
   binary_heap_remove_max(&heap);
   XCTAssertEqual(ret, 20);
