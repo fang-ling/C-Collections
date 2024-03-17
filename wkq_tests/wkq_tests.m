@@ -1278,6 +1278,206 @@ struct _BTreeNode {
   b_tree_deinit(&tree);
 }
 
+int test_string_cmp(const void* a, const void* b) {
+  return strcmp(a, b);
+}
+
+- (void) test_b_tree_large {
+  /* Test allow_duplicate small */
+  struct BTree tree;
+  b_tree_init(&tree, 2, sizeof(int), false, compare);
+//  char keys[] = "QWERTYUIOPASDFGHJKLZXCVBNMZXCVBNMASDFGHJKLQWERTYUIO";
+  var round = 100;
+//  while (round--) {
+    for (var i = 0; i < 8; i += 1) {
+      b_tree_insert(&tree, &i);
+    }
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+  printf("\n");
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->children[0]->keys)[i]);
+  }
+//  printf("\n");
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    printf("%d   ", ((int*)tree.root->children[1]->keys)[i]);
+  }
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    printf("f%d   ", ((int*)tree.root->children[2]->keys)[i]);
+  }
+  for (var i = 0; i < tree.root->children[3]->n; i += 1) {
+    printf("b%d   ", ((int*)tree.root->children[3]->keys)[i]);
+  }
+  printf("\n");
+//  }
+//  XCTAssertEqual(26, tree.count);
+//  for (var c = 'A'; c <= 'Z'; c += 1) {
+//  while (!tree.is_empty) {
+//  for (var i = 0; i < 8; i += 1) {
+    var result = 0;
+    b_tree_min(&tree, &result);
+//    printf("%d\n", result);
+//    XCTAssertEqual(result, c);
+    b_tree_remove(&tree, &result);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+  printf("\n");
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    printf("f%d      ", ((int*)tree.root->children[0]->keys)[i]);
+  }
+//  printf("\n");
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    printf("s%d   ", ((int*)tree.root->children[1]->keys)[i]);
+  }
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    printf("t%d   ", ((int*)tree.root->children[2]->keys)[i]);
+  }
+  printf("\n");
+  
+  
+  result = 1;
+  b_tree_min(&tree, &result);
+//    printf("%d\n", result);
+//    XCTAssertEqual(result, c);
+  b_tree_remove(&tree, &result);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+  printf("\n");
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    printf("f%d      ", ((int*)tree.root->children[0]->keys)[i]);
+  }
+//  printf("\n");
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    printf("s%d   ", ((int*)tree.root->children[1]->keys)[i]);
+  }
+  for (var i = 0; i < tree.root->children[2]->n; i += 1) {
+    printf("t%d   ", ((int*)tree.root->children[2]->keys)[i]);
+  }
+  printf("\n");
+  
+  
+  result = 2;
+  b_tree_min(&tree, &result);
+  b_tree_remove(&tree, &result);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+  printf("\n");
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    printf("f%d      ", ((int*)tree.root->children[0]->keys)[i]);
+  }
+//  printf("\n");
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    printf("s%d   ", ((int*)tree.root->children[1]->keys)[i]);
+  }
+  printf("\n");
+  
+  
+  result = 3;
+  b_tree_min(&tree, &result);
+  b_tree_remove(&tree, &result);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+  printf("\n");
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    printf("f%d      ", ((int*)tree.root->children[0]->keys)[i]);
+  }
+//  printf("\n");
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    printf("s%d   ", ((int*)tree.root->children[1]->keys)[i]);
+  }
+  printf("\n");
+  
+  
+  result = 4;
+  b_tree_min(&tree, &result);
+  b_tree_remove(&tree, &result);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+  printf("\n");
+  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+    printf("f%d      ", ((int*)tree.root->children[0]->keys)[i]);
+  }
+//  printf("\n");
+  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+    printf("s%d   ", ((int*)tree.root->children[1]->keys)[i]);
+  }
+  printf("\n");
+  
+  result = 5;
+  b_tree_min(&tree, &result);
+  b_tree_remove(&tree, &result);
+  for (var i = 0; i < tree.root->n; i += 1) {
+    printf("%d      ", ((int*)tree.root->keys)[i]);
+  }
+//  printf("\n");
+//  for (var i = 0; i < tree.root->children[0]->n; i += 1) {
+//    printf("f%d      ", ((int*)tree.root->children[0]->keys)[i]);
+//  }
+////  printf("\n");
+//  for (var i = 0; i < tree.root->children[1]->n; i += 1) {
+//    printf("s%d   ", ((int*)tree.root->children[1]->keys)[i]);
+//  }
+  printf("\n");
+  
+//  }
+  XCTAssertEqual(0, tree.count);
+  XCTAssertTrue(tree.is_empty);
+  b_tree_deinit(&tree);
+  
+//  struct TestString {
+//    char s[128];
+//  };
+//  
+//  struct Array strings;
+//  struct Array result;
+//  array_init(&strings, sizeof(struct TestString));
+//  array_init(&result, sizeof(struct TestString));
+//  
+//  var N = 163;
+//  struct TestString buf;
+//  for (var i = 0; i < N; i += 1) {
+//    var count = arc4random_uniform(127);
+//    for (var c = 0; c < count; c += 1) {
+//      buf.s[c] = 'A' + arc4random_uniform(26);
+//    }
+//    buf.s[count] = '\0';
+//    array_append(&strings, &buf);
+//  }
+//  
+//  b_tree_init(&tree, 4, sizeof(struct TestString), false, test_string_cmp);
+//  
+//  for (var i = 0; i < N; i += 1) {
+//    array_get(&strings, i, &buf);
+//    b_tree_insert(&tree, &buf);
+//  }
+//  /* Insert some duplicate keys */
+////  for (var i = 0; i < N / 64; i += 1) {
+////    array_get(&strings, arc4random_uniform(N), &buf);
+////    XCTAssertFalse(b_tree_insert(&tree, &buf));
+////  }
+//  
+//  while (!tree.is_empty) {
+////  while (N--) {
+//    b_tree_min(&tree, &buf);
+////    array_append(&result, &buf);
+////    printf("%d %s\n", tree.count, buf.s);
+//    XCTAssertEqual(b_tree_remove(&tree, &buf), 0);
+//  }
+  
+//  array_equal(&result, &strings);
+  
+//  b_tree_deinit(&tree);
+  
+//  array_deinit(&result);
+//  array_deinit(&strings);
+}
+
 @end
 
 //

@@ -567,7 +567,7 @@ static void _b_tree_remove_from_subtree(
               child -> keys + (t - 1) * width,
               x -> keys + (i - 1) + width,
               width
-            );
+            );/* TODO: BUG? */
             child -> key_counts[t - 1] = x -> key_counts[i - 1];
             child -> n += left_n + 1;
             /*
@@ -624,7 +624,7 @@ static void _b_tree_remove_from_subtree(
               child -> keys + (t - 1) * width,
               x -> keys + i * width,
               width
-            );
+            );/* TODO: BUG? */
             child -> key_counts[t - 1] = x -> key_counts[i];
             child -> n += right_n + 1;
             /*
