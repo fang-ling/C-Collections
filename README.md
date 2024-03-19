@@ -42,7 +42,7 @@ int main(int argc, const char * argv[]) {
   red_black_tree_init(&tree, sizeof(int), true, compare);
   
   int keys[] = {1, 2, 3, 19358, 5, 6, -12321};
-  int count = 7;
+  var count = 7;
   while (count--) {
     red_black_tree_insert(&tree, &keys[count]);
   }
