@@ -590,36 +590,17 @@ void red_black_tree_successor(
   void* key,
   void* result
 ) {
-  var x = tree -> root;
-  while (x != tree -> nil) { /* Find the node with key */
-    if (tree -> compare(x -> key, key) == 0) {
-      break;
+  var current = (*tree).root;
+  var successor = (*tree).nil;
+  while (current != (*tree).nil) {
+    if ((*tree).compare(current -> key, key) > 0) {
+      successor = current;
+      current = current -> children[0];
+    } else {
+      current = current -> children[1];
     }
-    x = x -> children[(tree -> compare(x -> key, key) < 0) ? 1 : 0];
   }
-  
-  if (x == tree -> nil) {
-    result = NULL;
-    return;
-  }
-  
-  if (x -> children[1] != tree -> nil) {
-    memcpy(
-      result,
-      _minimum(tree, x -> children[1]) -> key,
-      (*tree).element_size
-    );
-  }
-  var y = x -> p;
-  while (y != tree -> nil && x == y -> children[1]) {
-    x = y;
-    y = y -> p;
-  }
-  /* 
-   * This will return NULL when y == nil which cause by x has the largest key
-   * in the tree.
-   */
-  memcpy(result, y -> key, (*tree).element_size);
+  memcpy(result, successor -> key, (*tree).element_size);
 }
 
 /* Returns the largest key smaller than the given key. */
@@ -628,36 +609,17 @@ void red_black_tree_predecessor(
   void* key,
   void* result
 ) {
-  var x = tree -> root;
-  while (x != tree -> nil) { /* Find the node with key */
-    if (tree -> compare(x -> key, key) == 0) {
-      break;
+  var current = (*tree).root;
+  var predecessor = (*tree).nil;
+  while (current != (*tree).nil) {
+    if ((*tree).compare(current -> key, key) < 0) {
+      predecessor = current;
+      current = current -> children[1];
+    } else {
+      current = current -> children[0];
     }
-    x = x -> children[(tree -> compare(x -> key, key) < 0) ? 1 : 0];
   }
-  
-  if (x == tree -> nil) {
-    result = NULL;
-    return;
-  }
-  
-  if (x -> children[0] != tree -> nil) {
-    memcpy(
-      result,
-      _maximum(tree, x -> children[0]) -> key,
-      (*tree).element_size
-    );
-  }
-  var y = x -> p;
-  while (y != tree -> nil && x == y -> children[0]) {
-    x = y;
-    y = y -> p;
-  }
-  /* 
-   * This will return NULL when y == nil which cause by x has the smallest
-   * key in the tree.
-   */
-  memcpy(result, y -> key, (*tree).element_size);
+  memcpy(result, predecessor -> key, (*tree).element_size);
 }
 
 /* 
