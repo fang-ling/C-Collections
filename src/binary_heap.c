@@ -98,7 +98,7 @@ static void max_heapify_down(struct BinaryHeap* heap, int i) {
    * If i is smaller than j (i's largest child), we are violate the max
    * heap property. Fix it by swap i.key with j.key and then recur on j.
    */
-  if ( /* _storage[i] < _storage[j]) */
+  if ( /* _storage[i] <= _storage[j]) */
     (*heap).compare(
       (*heap)._storage._storage + i * (*heap).element_size,
       (*heap)._storage._storage + j * (*heap).element_size

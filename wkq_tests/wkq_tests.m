@@ -14,6 +14,7 @@
 #import "b_tree.h"
 #import "binary_heap.h"
 #import "deque.h"
+#import "string.h"
 
 #import "binary_search.h"
 #import "sort.h"
@@ -1476,6 +1477,19 @@ int test_string_cmp(const void* a, const void* b) {
   
 //  array_deinit(&result);
 //  array_deinit(&strings);
+}
+
+- (void) test_string {
+  var c_str = "This is a test string, こんにちは, 🐶。";
+  struct String str;
+  string_init2(&str, c_str);
+  
+  XCTAssertEqual(strlen(c_str), str.utf8.count);
+  XCTAssertEqual(32, str.count);
+  XCTAssertFalse(str.is_empty);
+  XCTAssertEqual(0, memcmp(c_str, str.utf8._storage, str.utf8.count));
+  
+  string_deinit(&str);
 }
 
 @end
