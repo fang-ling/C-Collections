@@ -52,8 +52,8 @@ void string_init(struct String* str) {
  * Creates a string from the null-terminated character sequence (C-string) 
  * pointed by s.
  */
-void string_init2(struct String* str, const char* s) {
-  array_init(&(*str).utf8, sizeof(char));
+void string_init_c_string(struct String* str, const char* s) {
+  string_init(str);
   
   var _s = s;
   while (*_s != '\0') {
@@ -74,6 +74,31 @@ void string_deinit(struct String* str) {
   array_deinit(&(*str).utf8);
   (*str).count = 0;
   (*str).is_empty = true;
+}
+
+/* MARK: - Appending Strings and Characters */
+
+/* 
+ * Appends the given string to this string.
+ * Never do string_append(&str, &str);
+ */
+void string_append(struct String* str, struct String* other) {
+  (*str).count += (*other).count;
+  (*str).is_empty = (*str).is_empty && (*other).is_empty;
+  array_combine(&(*str).utf8, &(*other).utf8);
+}
+
+/* 
+ * Appends the null-terminated character sequence (C-string) pointed by other
+ * to this string.
+ */
+void string_append_c_string(struct String* str, const char* other) {
+  struct String s;
+  string_init_c_string(&s, other);
+  
+  string_append(str, &s);
+  
+  string_deinit(&s);
 }
 
 /*===----------------------------------------------------------------------===*/

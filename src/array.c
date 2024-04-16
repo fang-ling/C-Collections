@@ -392,7 +392,10 @@ bool array_equal(
 
 /* MARK: - Combining Arrays */
 
-/* Appends the elements of an array to this array. */
+/* 
+ * Appends the elements of an array to this array.
+ * NEVER do array_combine(&array, &array);
+ */
 void array_combine(struct Array* array, struct Array* other) {
   if ((*array).element_size != (*other).element_size) {
     return;

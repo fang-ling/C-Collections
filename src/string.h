@@ -24,9 +24,18 @@ void string_init(struct String* str);
  * Creates a string from the null-terminated character sequence (C-string)
  * pointed by s.
  */
-void string_init2(struct String* str, const char* s);
+void string_init_c_string(struct String* str, const char* s);
 
 /* Destroys a string. */
 void string_deinit(struct String* str);
+
+/* Appends the given string to this string. */
+void string_append(struct String* str, struct String* other);
+
+/*
+ * Appends the null-terminated character sequence (C-string) pointed by other
+ * to this string.
+ */
+void string_append_c_string(struct String* str, const char* other);
 
 #endif /* string_h */

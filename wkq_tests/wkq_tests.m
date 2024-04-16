@@ -27,6 +27,8 @@
 
 @implementation wkq_tests
 
+/* MARK: - Array */
+
 - (void)test_array_init {
   struct Array array;
   array_init(&array, sizeof(int));
@@ -348,6 +350,44 @@ bool int_equal(const void* a, const void* b) {
   XCTAssertTrue(array.is_empty);
 
   array_deinit(&array);
+}
+
+- (void)test_array_combine {
+  struct Array lhs;
+  array_init(&lhs, sizeof(double));
+  struct Array rhs;
+  array_init(&rhs, sizeof(double));
+  struct Array sol;
+  array_init(&sol, sizeof(double));
+  
+  double L[] = {1, 2, 3, 4, 19358};
+  double R[] = {12361, 12333, 19342, 7891, 231, 19306};
+  double result[] = {1, 2, 3, 4, 19358, 12361, 12333, 19342, 7891, 231, 19306};
+  
+  for (var i = 0; i < 5; i += 1) {
+    array_append(&lhs, &L[i]);
+  }
+  for (var i = 0; i < 6; i += 1) {
+    array_append(&rhs, &R[i]);
+  }
+  
+  XCTAssertTrue(sol.is_empty);
+  XCTAssertEqual(sol.count, 0);
+  
+  array_combine(&sol, &lhs);
+  
+  XCTAssertFalse(sol.is_empty);
+  XCTAssertEqual(sol.count, 5);
+  XCTAssertEqual(0, memcmp(sol._storage, L, sizeof(double) * 5));
+  
+  array_combine(&sol, &rhs);
+  XCTAssertFalse(sol.is_empty);
+  XCTAssertEqual(sol.count, 11);
+  XCTAssertEqual(0, memcmp(sol._storage, result, sizeof(double) * 11));
+  
+  array_deinit(&sol);
+  array_deinit(&lhs);
+  array_deinit(&rhs);
 }
 
 // MARK: - sort
@@ -1479,15 +1519,38 @@ int test_string_cmp(const void* a, const void* b) {
 //  array_deinit(&strings);
 }
 
-- (void) test_string {
+- (void) test_string_init {
   var c_str = "This is a test string, こんにちは, 🐶。";
   struct String str;
-  string_init2(&str, c_str);
+  string_init_c_string(&str, c_str);
   
   XCTAssertEqual(strlen(c_str), str.utf8.count);
   XCTAssertEqual(32, str.count);
   XCTAssertFalse(str.is_empty);
   XCTAssertEqual(0, memcmp(c_str, str.utf8._storage, str.utf8.count));
+  
+  string_deinit(&str);
+}
+
+- (void) test_string_append {
+  struct String str;
+  string_init(&str);
+  
+  var c_str = "This is a test string, こんにちは, 🐶。";
+  string_append_c_string(&str, c_str);
+  
+  XCTAssertEqual(strlen(c_str), str.utf8.count);
+  XCTAssertEqual(32, str.count);
+  XCTAssertFalse(str.is_empty);
+  XCTAssertEqual(0, memcmp(c_str, str.utf8._storage, str.utf8.count));
+  
+  string_append_c_string(&str, c_str);
+  
+  XCTAssertEqual(strlen(c_str) * 2, str.utf8.count);
+  XCTAssertEqual(32 * 2, str.count);
+  XCTAssertFalse(str.is_empty);
+  XCTAssertEqual(0, memcmp(c_str, str.utf8._storage, str.utf8.count / 2));
+  XCTAssertEqual(0, memcmp(c_str, str.utf8._storage + strlen(c_str), str.utf8.count / 2));
   
   string_deinit(&str);
 }
