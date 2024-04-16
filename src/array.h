@@ -112,4 +112,7 @@ bool array_equal(
   int (*elem_compare)(const void*, const void*)*/
 );
 
+/* Appends the elements of an array to this array. */
+void array_combine(struct Array* array, struct Array* other);
+
 #endif /* array_h */

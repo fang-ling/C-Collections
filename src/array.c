@@ -3,7 +3,7 @@
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.6                                         \ \ \_/__ \_\ \_  __  */
+/* Version: 1.7                                         \ \ \_/__ \_\ \_  __  */
 /* Date: January 4, 2024                                 \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
@@ -25,6 +25,9 @@
 #include "sort.h"
 
 #define var __auto_type
+
+#define ARRAY_MULTIPLE_FACTOR 2
+#define ARRAY_RESIZE_FACTOR   4
 
 /*
  * Error code of Array:
@@ -152,14 +155,12 @@ int array_set(struct Array* array, int index, void* element) {
 
 /* Adds a new element at the end of the array. */
 int array_append(struct Array* array, void* element) {
-  var q = 2; /* multiple factor = 2 */
-  
   if ((*array).capacity == 0) {
     (*array)._storage = realloc((*array)._storage, 1 * (*array).element_size);
     (*array).capacity = 1;
   }
   if ((*array).count == (*array).capacity) {
-    (*array).capacity *= q;
+    (*array).capacity *= ARRAY_MULTIPLE_FACTOR;
     var new_size = (*array).capacity * (*array).element_size;
     (*array)._storage = realloc((*array)._storage, new_size);
     if ((*array)._storage == NULL) {
@@ -222,9 +223,6 @@ int array_insert(struct Array* array, void* element, int i) {
 
 /* Removes the last element of the collection. */
 int array_remove_last(struct Array* array) {
-  var q1 = 4;
-  var q2 = 2;
-
   if ((*array).is_empty) {
     return 6;
   }
@@ -232,8 +230,8 @@ int array_remove_last(struct Array* array) {
   if ((*array).count == 0) {
     (*array).is_empty = true;
   }
-  if ((*array).count * q1 <= (*array).capacity) {
-    (*array).capacity /= q2;
+  if ((*array).count * ARRAY_RESIZE_FACTOR <= (*array).capacity) {
+    (*array).capacity /= ARRAY_MULTIPLE_FACTOR;
     var new_size = (*array).capacity * (*array).element_size;
     (*array)._storage = realloc((*array)._storage, new_size);
     if ((*array)._storage == NULL) {
@@ -390,6 +388,38 @@ bool array_equal(
     return false;
   }
   return true;
+}
+
+/* MARK: - Combining Arrays */
+
+/* Appends the elements of an array to this array. */
+void array_combine(struct Array* array, struct Array* other) {
+  if ((*array).element_size != (*other).element_size) {
+    return;
+  }
+  var original_count = (*array).count;
+  (*array).is_empty = (*array).is_empty && (*other).is_empty;
+  
+  /* Dummy append for allocating spaces */
+  var i = 0;
+  for (i = 0; i < (*other).count; i += 1) {
+    if ((*array).capacity == 0) {
+      (*array)._storage = realloc((*array)._storage, 1 * (*array).element_size);
+      (*array).capacity = 1;
+    }
+    if ((*array).count == (*array).capacity) {
+      (*array).capacity *= ARRAY_MULTIPLE_FACTOR;
+      var new_size = (*array).capacity * (*array).element_size;
+      (*array)._storage = realloc((*array)._storage, new_size);
+    }
+    (*array).count += 1;
+  }
+  
+  memcpy(
+    (*array)._storage + original_count * (*array).element_size,
+    (*other)._storage,
+    (*other).count * (*other).element_size
+  );
 }
 
 /*===----------------------------------------------------------------------===*/
