@@ -38,4 +38,15 @@ void string_append(struct String* str, struct String* other);
  */
 void string_append_c_string(struct String* str, const char* other);
 
+/*
+ * Returns an array containing substrings from the string that have been divided
+ * by the given separator.
+ * It's caller's responsibility to free the strings stored in the result.
+ */
+void string_components_c_string(
+  struct String* str,
+  const char* separator,
+  struct Array* result
+);
+
 #endif /* string_h */

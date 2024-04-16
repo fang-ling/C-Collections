@@ -18,7 +18,9 @@
  * information
  */
 
+#include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "array.h"
 
@@ -38,6 +40,64 @@ struct String {
   /* A Boolean value indicating whether a string has no characters. */
   bool is_empty;
 };
+
+/*-
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2001 Mike Barcroft <mike@FreeBSD.org>
+ * Copyright (c) 1990, 1993
+ *  The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Chris Torek.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+/*
+ * Find the first occurrence of find in s, where the search is limited to the
+ * first slen characters of s.
+ */
+static char* wkq_strnstr(const char* s, const char* find, int slen) {
+  char c, sc;
+  int len;
+  
+  if ((c = *find++) != '\0') {
+    len = (int)strlen(find);
+    do {
+      do {
+        if (slen-- < 1 || (sc = *s++) == '\0')
+          return (NULL);
+      } while (sc != c);
+      if (len > slen)
+        return (NULL);
+    } while (strncmp(s, find, len) != 0);
+    s--;
+  }
+  return ((char *)s);
+}
 
 /* MARK: - Creating and Destroying a String */
 
@@ -100,6 +160,66 @@ void string_append_c_string(struct String* str, const char* other) {
   
   string_deinit(&s);
 }
+
+/* MARK: - Splitting a String */
+
+/*
+ * Returns an array containing substrings from the string that have been divided
+ * by the given separator.
+ * It's caller's responsibility to free the strings stored in the result.
+ */
+/*
+ *                    1                 2    3             4
+ * Assuming: str = "#zyy#jasdjq2n3oasd#zyy##zyy#adn972929#zyy#"
+ *           separator = "#zyy#"
+ *      will return 5 substrings.
+ */
+void string_components_c_string(
+  struct String* str,
+  const char* separator,
+  struct Array* result
+) {
+  var separator_len = (int)strlen(separator);
+  
+  char* tofree;
+  var s = (char*)malloc(sizeof(char) * ((*str).utf8.count + 1 + separator_len));
+  tofree = s;
+  memcpy(s, (*str).utf8._storage, sizeof(char) * (*str).utf8.count);
+  /* Append the dummy separator */
+  memcpy(s + (*str).utf8.count, separator, separator_len);
+  s[(*str).utf8.count + separator_len] = '\0';
+  
+  var substr_end = 0;
+  var last_len = 0;
+  var remaining_len = (*str).utf8.count + separator_len;
+  
+  char* i_p;
+  while ((i_p = wkq_strnstr(s, separator, remaining_len)) != NULL) {
+    remaining_len -= last_len;
+    
+    substr_end = (int)(i_p - s);
+    s[substr_end] = '\0';
+    last_len = (int)strlen(s);
+    
+    struct String new_str;
+    string_init_c_string(&new_str, s);
+    array_append(result, &new_str);
+    /* Let the caller to call string_deinit(&new_str); */
+    s += last_len;
+    s += separator_len;
+    remaining_len -= separator_len;
+  }
+  
+  free(tofree);
+}
+
+/*void string_components(
+  struct String* str,
+  struct String* separator,
+  struct Array* result
+) {
+  
+}*/
 
 /*===----------------------------------------------------------------------===*/
 /*             ___                            ___                             */

@@ -1555,6 +1555,30 @@ int test_string_cmp(const void* a, const void* b) {
   string_deinit(&str);
 }
 
+/*- (void) test_string_components {
+  struct String str;
+  string_init_c_string(&str, "#zyy#jasdjq2n3oasd#zyy##zyy#adn972929#zyy#");
+  //
+  struct Array result;
+  array_init(&result, sizeof(struct String));
+  
+  string_components_c_string(&str, "#zyy#", &result);
+  
+  var zero = '\0';
+  
+  printf("%d\n", result.count);
+  for (var i = 0; i < result.count; i += 1) {
+    struct String s;
+    array_get(&result, i, &s);
+    array_append(&s.utf8, &zero);
+    printf("%s\n", (char*)s.utf8._storage);
+  }
+  
+  array_deinit((&result));
+  
+  string_deinit(&str);
+}*/
+
 @end
 
 //
