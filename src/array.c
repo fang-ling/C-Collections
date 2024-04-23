@@ -3,31 +3,22 @@
 /* Array START                                          /'___\ /\_ \          */
 /*                                                     /\ \__/ \//\ \         */
 /* Author: Fang Ling (fangling@fangl.ing)              \ \ ,__\  \ \ \        */
-/* Version: 1.7                                         \ \ \_/__ \_\ \_  __  */
-/* Date: January 4, 2024                                 \ \_\/\_\/\____\/\_\ */
+/* Version: 2.0                                         \ \ \_/__ \_\ \_  __  */
+/* Date: April 22, 2024                                  \ \_\/\_\/\____\/\_\ */
 /*                                                        \/_/\/_/\/____/\/_/ */
 /*===----------------------------------------------------------------------===*/
 
 /*
  * This source file is part of the C Collections open source project
  *
- * Copyright (c) 2023 Fang Ling
+ * Copyright (c) 2024 Fang Ling
  * Licensed under Apache License v2.0
  *
  * See https://github.com/fang-ling/C-Collections/blob/main/LICENSE for license
  * information
  */
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "sort.h"
-
-#define var __auto_type
-
-#define ARRAY_MULTIPLE_FACTOR 2
-#define ARRAY_RESIZE_FACTOR   4
+#include "array.h"
 
 /*
  * Error code of Array:
@@ -39,39 +30,7 @@
  * 6: Can't remove last element from an empty collection
  */
 
-struct Array {
-  void* _storage;
-  
-  /* The number of elements in the array. */
-  int count;
-  
-  /*
-   * The total number of elements that the array can contain without
-   * allocating new storage.
-   *
-   * Every array reserves a specific amount of memory to hold its contents.
-   * When you add elements to an array and that array begins to exceed its
-   * reserved capacity, the array allocates a larger region of memory and
-   * copies its elements into the new storage. The new storage is a multiple
-   * of the old storage's size. This exponential growth strategy means that
-   * appending an element happens in constant time, averaging the performance
-   * of many append operations. Append operations that trigger reallocation
-   * have a performance cost, but they occur less and less often as the array
-   * grows larger.
-   */
-  int capacity;
-  
-  /* The size of stored Element type. */
-  int element_size;
-  
-  /* A Boolean value indicating whether or not the array is empty. */
-  bool is_empty;
-};
-
-/* MARK: - Creating and Destroying an Array */
-
-static
-int _array_init(struct Array* array, unsigned int count, int element_size) {
+static void _array_init(struct Array* array, size_t count, size_t width) {
   /* Rounding up to next power of 2 */
   var capacity = count - 1;
   capacity |= capacity >> 1;
@@ -82,40 +41,23 @@ int _array_init(struct Array* array, unsigned int count, int element_size) {
   capacity += 1;
   
   if (count == 0) {
-    (*array)._storage = NULL;
+    array->_storage = NULL;
   } else {
-    (*array)._storage = malloc(capacity * element_size);
-    if ((*array)._storage == NULL) {
-      return 1;
+    array->_storage = malloc(capacity * width);
+    if (array->_storage == NULL) {
+      fprintf(stderr, ARRAY_FATAL_ERR_MALLOC);
+      abort();
     }
   }
-  (*array).element_size = element_size;
-  (*array).capacity = capacity;
-  (*array).count = count;
-  (*array).is_empty = count == 0 ? true : false;
-  
-  return 0;
+  array->_width = width;
+  array->_capacity = capacity;
+  array->count = count;
+  array->is_empty = count == 0 ? true : false;
 }
-
-/* Creates an empty array. */
-int array_init(struct Array* array, int element_size) {
-  return _array_init(array, 0, element_size);
-}
-
-/* Destroys an array. */
-void array_deinit(struct Array* array) {
-  free((*array)._storage);
-  (*array).count = 0;
-  (*array).element_size = 0;
-  (*array).capacity = 0;
-  (*array).is_empty = true;
-}
-
-/* MARK: - Accessing Elements */
 
 /* Check that the specified `index` is valid, i.e. `0 ≤ index < count`. */
 static int _check_index(struct Array* array, int index) {
-  if (index >= (*array).count) {
+  if (index >= array->count) {
     return 2;
   } else if (index < 0) {
     return 3;
@@ -123,170 +65,193 @@ static int _check_index(struct Array* array, int index) {
   return 0;
 }
 
-/* Returns the element at the specified position. */
-int array_get(struct Array* array, int index, void* element) {
-  var err = _check_index(array, index);
-  if (err != 0) {
-    return err;
+/* MARK: - Creating and Destroying an Array */
+
+struct Array* array_init(size_t width) {
+  struct Array* array;
+  if ((array = malloc(sizeof(struct Array))) == NULL) {
+    return NULL;
   }
-  memcpy(
-    element,
-    (*array)._storage + (*array).element_size * index,
-    (*array).element_size
-  );
-  return err;
+  _array_init(array, 0, width);
+  return array;
 }
 
-/* Replaces the element at the specified position. */
-int array_set(struct Array* array, int index, void* element) {
-  var err = _check_index(array, index);
-  if (err != 0) {
-    return err;
+void array_deinit(struct Array* array) {
+  if (array == NULL) {
+    return;
   }
-  memcpy(
-    (*array)._storage + (*array).element_size * index,
-    element,
-    (*array).element_size
-  );
-  return err;
+  
+  free(array->_storage);
+  array->count = 0;
+  array->_width = 0;
+  array->_capacity = 0;
+  array->is_empty = true;
+  
+  free(array);
 }
+
+/* MARK: - Accessing Elements */
+
+/* Returns the element at the specified position. */
+//int array_get(struct Array* array, int index, void* element) {
+//  var err = _check_index(array, index);
+//  if (err != 0) {
+//    return err;
+//  }
+//  memcpy(
+//    element,
+//    array->_storage + array->width * index,
+//    array->width
+//  );
+//  return err;
+//}
+
+/* Replaces the element at the specified position. */
+//int array_set(struct Array* array, int index, void* element) {
+//  var err = _check_index(array, index);
+//  if (err != 0) {
+//    return err;
+//  }
+//  memcpy(
+//    array->_storage + array->width * index,
+//    element,
+//    array->width
+//  );
+//  return err;
+//}
 
 /* MARK: - Adding Elements */
 
-/* Adds a new element at the end of the array. */
-int array_append(struct Array* array, void* element) {
-  if ((*array).capacity == 0) {
-    (*array)._storage = realloc((*array)._storage, 1 * (*array).element_size);
-    (*array).capacity = 1;
+void array_append(struct Array* array, void* new_element) {
+  if (array->_capacity == 0) {
+    array->_storage = realloc(array->_storage, 1 * array->_width);
+    array->_capacity = 1;
   }
-  if ((*array).count == (*array).capacity) {
-    (*array).capacity *= ARRAY_MULTIPLE_FACTOR;
-    var new_size = (*array).capacity * (*array).element_size;
-    (*array)._storage = realloc((*array)._storage, new_size);
-    if ((*array)._storage == NULL) {
-      /* FIXME: memory leak will happen if realloc failed */
-      return 5;
+  if (array->count == array->_capacity) {
+    array->_capacity *= ARRAY_MULTIPLE_FACTOR;
+    var new_size = array->_capacity * array->_width;
+    array->_storage = realloc(array->_storage, new_size);
+    if (array->_storage == NULL) {
+      fprintf(stderr, ARRAY_FATAL_ERR_REALLO);
+      abort();
     }
   }
-  (*array).count += 1;
-  (*array).is_empty = false;
-  array_set(array, (*array).count - 1, element);
-  
-  return 0;
+  array->count += 1;
+  array->is_empty = false;
+  memcpy(
+    array->_storage + (array->count - 1) * array->_width,
+    new_element, 
+    array->_width
+  );
 }
 
-/* 
- * Inserts a new element at the specified position.
- *
- * - Complexity:
- *   O(n), where n is the length of the array.
- */
-int array_insert(struct Array* array, void* element, int i) {
-  if (i == (*array).count) { /* this method is equivalent to append(_:) */
-    return array_append(array, element);
-  }
-  var err = _check_index(array, i);
-  if (err != 0) {
-    return err;
-  }
-  /* Dumb append to make room for the new element. Update is_empty & count. */
-  if ((err = array_append(array, element)) != 0) {
-    return err;
-  }
-  /*
-   * [1, 2, 3, 4, 5]  <----- insert(100, at: 3)
-   *
-   *  0  1  2  3  4    5
-   * [1, 2, 3, 4, 5, 100]  <---- after append, count = 6
-   *           \--/  <---- shift right by one (i ..< count - 1)
-   *                                          (move length = count - 1 - i)
-   *
-   * Then copy new_element at index 3.
-   *
-   *    0  1  2    3  4  5
-   * = [1, 2, 3, 100, 4, 5]
-   */
-  memmove(
-    (*array)._storage + (i + 1) * (*array).element_size,
-    (*array)._storage + i * (*array).element_size,
-    ((*array).count - 1 - i) * (*array).element_size
-  );
-  memcpy(
-    (*array)._storage + i * (*array).element_size,
-    element,
-    (*array).element_size
-  );
-  return err;
-}
+///* 
+// * Inserts a new element at the specified position.
+// *
+// * - Complexity:
+// *   O(n), where n is the length of the array.
+// */
+//int array_insert(struct Array* array, void* element, int i) {
+//  if (i == array->count) { /* this method is equivalent to append(_:) */
+//    return array_append(array, element);
+//  }
+//  var err = _check_index(array, i);
+//  if (err != 0) {
+//    return err;
+//  }
+//  /* Dumb append to make room for the new element. Update is_empty & count. */
+//  if ((err = array_append(array, element)) != 0) {
+//    return err;
+//  }
+//  /*
+//   * [1, 2, 3, 4, 5]  <----- insert(100, at: 3)
+//   *
+//   *  0  1  2  3  4    5
+//   * [1, 2, 3, 4, 5, 100]  <---- after append, count = 6
+//   *           \--/  <---- shift right by one (i ..< count - 1)
+//   *                                          (move length = count - 1 - i)
+//   *
+//   * Then copy new_element at index 3.
+//   *
+//   *    0  1  2    3  4  5
+//   * = [1, 2, 3, 100, 4, 5]
+//   */
+//  memmove(
+//    array->_storage + (i + 1) * array->_width,
+//    array->_storage + i * array->_width,
+//    (array->count - 1 - i) * array->_width
+//  );
+//  memcpy(
+//    array->_storage + i * array->_width,
+//    element,
+//    array->_width
+//  );
+//  return err;
+//}
 
 /* MARK: - Removing Elements */
 
-/* Removes the last element of the collection. */
-int array_remove_last(struct Array* array) {
-  if ((*array).is_empty) {
-    return 6;
+void array_remove_last(struct Array* array) {
+  if (array->is_empty) {
+    fprintf(stderr, ARRAY_FATAL_ERR_REMEM);
+    abort();
   }
-  (*array).count -= 1;
-  if ((*array).count == 0) {
-    (*array).is_empty = true;
+  array->count -= 1;
+  if (array->count == 0) {
+    array->is_empty = true;
   }
-  if ((*array).count * ARRAY_RESIZE_FACTOR <= (*array).capacity) {
-    (*array).capacity /= ARRAY_MULTIPLE_FACTOR;
-    var new_size = (*array).capacity * (*array).element_size;
-    (*array)._storage = realloc((*array)._storage, new_size);
-    if ((*array)._storage == NULL) {
-      /* FIXME: memory leak will happen if realloc failed */
-      return 5;
+  if (array->count * ARRAY_RESIZE_FACTOR <= array->_capacity) {
+    array->_capacity /= ARRAY_MULTIPLE_FACTOR;
+    var new_size = array->_capacity * array->_width;
+    array->_storage = realloc(array->_storage, new_size);
+    if (array->_storage == NULL) {
+      fprintf(stderr, ARRAY_FATAL_ERR_REALLO);
+      abort();
     }
   }
-
-  return 0;
 }
 
-/* 
- * Removes the element at the specified position.
- *
- * - Complexity:
- *   O(n), where n is the length of the array.
- */
-int array_remove_at(struct Array* array, int i) {
-  var err = 0;
-  if ((err = _check_index(array, i)) != 0) {
-    return err;
-  }
+///* 
+// * Removes the element at the specified position.
+// *
+// * - Complexity:
+// *   O(n), where n is the length of the array.
+// */
+//int array_remove_at(struct Array* array, int i) {
+//  var err = 0;
+//  if ((err = _check_index(array, i)) != 0) {
+//    return err;
+//  }
+//
+//  if (i == array->count - 1) {
+//    return array_remove_last(array);
+//  }
+//
+//  /*
+//   *    0    1    2    3    4    5    6
+//   * [1.1, 1.5, 2.9, 1.2, 1.5, 1.3, 1.2]   <---  remove(at: 2)
+//   *                 \----------------/  <---  shift left by one (i+1 ..< count)
+//   *                                     <--- move length = count - i - 1
+//   * [1.1, 1.5, 1.2, 1.5, 1.3, 1.2, 1.2]
+//   *
+//   * then, call remove_last()
+//   *
+//   * [1.1, 1.5, 1.2, 1.5, 1.3, 1.2]
+//   */
+//  memmove(
+//    array->_storage + i * array->width,
+//    array->_storage + (i + 1) * array->width,
+//    (array->count - i - 1) * array->width
+//  );
+//  return array_remove_last(array);
+//}
 
-  if (i == (*array).count - 1) {
-    return array_remove_last(array);
-  }
-
-  /*
-   *    0    1    2    3    4    5    6
-   * [1.1, 1.5, 2.9, 1.2, 1.5, 1.3, 1.2]   <---  remove(at: 2)
-   *                 \----------------/  <---  shift left by one (i+1 ..< count)
-   *                                     <--- move length = count - i - 1
-   * [1.1, 1.5, 1.2, 1.5, 1.3, 1.2, 1.2]
-   *
-   * then, call remove_last()
-   *
-   * [1.1, 1.5, 1.2, 1.5, 1.3, 1.2]
-   */
-  memmove(
-    (*array)._storage + i * (*array).element_size,
-    (*array)._storage + (i + 1) * (*array).element_size,
-    ((*array).count - i - 1) * (*array).element_size
-  );
-  return array_remove_last(array);
-}
-
-/* Removes all the elements. */
-int array_remove_all(struct Array* array) {
-  free((*array)._storage);
-  (*array)._storage = NULL;
-  (*array).count = 0;
-  (*array).capacity = 0;
-  (*array).is_empty = true;
-  
-  return 0;
+void array_remove_all(struct Array* array) {
+  free(array->_storage);
+  array->_storage = NULL;
+  array->count = 0;
+  array->_capacity = 0;
+  array->is_empty = true;
 }
 
 /* MARK: - Finding Elements */
@@ -295,74 +260,73 @@ int array_remove_all(struct Array* array) {
  * Returns a Boolean value indicating whether the sequence contains the given 
  * element.
  */
-bool array_contains(
-  struct Array* array,
-  void* key,
-  bool (*equal)(const void*, const void*)
-) {
-  var buf = malloc((*array).element_size);
-  var i = 0;
-  for (i = 0; i < (*array).count; i += 1) {
-    array_get(array, i, buf);
-    if (equal(buf, key)) {
-      free(buf);
-      return true;
-    }
-  }
-  free(buf);
-  return false;
-}
-
-/*
- * Returns the first index where the specified value appears in the collection.
- */
-int array_first_index(
-  struct Array* array,
-  void* key,
-  bool (*equal)(const void*, const void*)
-) {
-  var buf = malloc((*array).element_size);
-  var i = 0;
-  for (i = 0; i < (*array).count; i += 1) {
-    array_get(array, i, buf);
-    if (equal(buf, key)) {
-      free(buf);
-      return i;
-    }
-  }
-  free(buf);
-  return -1;
-}
+//bool array_contains(
+//  struct Array* array,
+//  void* key,
+//  bool (*equal)(const void*, const void*)
+//) {
+//  var buf = malloc(array->width);
+//  var i = 0;
+//  for (i = 0; i < array->count; i += 1) {
+//    array_get(array, i, buf);
+//    if (equal(buf, key)) {
+//      free(buf);
+//      return true;
+//    }
+//  }
+//  free(buf);
+//  return false;
+//}
+//
+///*
+// * Returns the first index where the specified value appears in the collection.
+// */
+//int array_first_index(
+//  struct Array* array,
+//  void* key,
+//  bool (*equal)(const void*, const void*)
+//) {
+//  var buf = malloc(array->width);
+//  var i = 0;
+//  for (i = 0; i < array->count; i += 1) {
+//    array_get(array, i, buf);
+//    if (equal(buf, key)) {
+//      free(buf);
+//      return i;
+//    }
+//  }
+//  free(buf);
+//  return -1;
+//}
 
 /* MARK: - Reordering an Array’s Elements */
 
-/* Sorts the collection in place. */
 void array_sort(struct Array* array, int (*compare)(const void*, const void*)) {
-  if ((*array).count <= 1) {
+  if (array->count <= 1) {
     return;
   }
-  sort((*array)._storage, (*array).count, (*array).element_size, compare);
+  sort(array->_storage, array->count, array->_width, compare);
 }
-
-/* Exchanges the values at the specified indices of the collection. */
-int array_swap_at(struct Array* array, int i, int j) {
-  var err = 0;
-  if ((err = _check_index(array, i)) != 0) {
-    return err;
-  }
-  if ((err = _check_index(array, j)) != 0) {
-    return err;
-  }
-  if (i == j) {
-    return 0;
-  }
-  var width = (*array).element_size;
-  var buf = malloc(width);
-  memcpy(buf, (*array)._storage + i * width, width);
-  memcpy((*array)._storage + i * width, (*array)._storage + j * width, width);
-  memcpy((*array)._storage + j * width, buf, width);
-  return 0;
-}
+//
+///* Exchanges the values at the specified indices of the collection. */
+//int array_swap_at(struct Array* array, int i, int j) {
+//  var err = 0;
+//  if ((err = _check_index(array, i)) != 0) {
+//    return err;
+//  }
+//  if ((err = _check_index(array, j)) != 0) {
+//    return err;
+//  }
+//  if (i == j) {
+//    return 0;
+//  }
+//  var width = array->width;
+//  var buf = malloc(width);
+//  memcpy(buf, array->_storage + i * width, width);
+//  memcpy(array->_storage + i * width, array->_storage + j * width, width);
+//  memcpy(array->_storage + j * width, buf, width);
+//  return 0;
+//}
 
 /* MARK: - Comparing Arrays */
 
@@ -370,25 +334,25 @@ int array_swap_at(struct Array* array, int i, int j) {
  * Returns a Boolean value indicating whether two arrays contain the same
  * elements in the same order.
  */
-bool array_equal(
-  struct Array* lhs,
-  struct Array* rhs/*,
-  int (*elem_compare)(const void*, const void*)*/
-) {
-  if ((*lhs).count != (*rhs).count) {
-    return false;
-  }
-  if (
-    memcmp(
-      (*lhs)._storage,
-      (*rhs)._storage,
-      (*lhs).count * (*lhs).element_size
-    ) != 0
-  ) {
-    return false;
-  }
-  return true;
-}
+//bool array_equal(
+//  struct Array* lhs,
+//  struct Array* rhs/*,
+//  int (*elem_compare)(const void*, const void*)*/
+//) {
+//  if ((*lhs).count != (*rhs).count) {
+//    return false;
+//  }
+//  if (
+//    memcmp(
+//      (*lhs)._storage,
+//      (*rhs)._storage,
+//      (*lhs).count * (*lhs).width
+//    ) != 0
+//  ) {
+//    return false;
+//  }
+//  return true;
+//}
 
 /* MARK: - Combining Arrays */
 
@@ -396,34 +360,34 @@ bool array_equal(
  * Appends the elements of an array to this array.
  * NEVER do array_combine(&array, &array);
  */
-void array_combine(struct Array* array, struct Array* other) {
-  if ((*array).element_size != (*other).element_size) {
-    return;
-  }
-  var original_count = (*array).count;
-  (*array).is_empty = (*array).is_empty && (*other).is_empty;
-  
-  /* Dummy append for allocating spaces */
-  var i = 0;
-  for (i = 0; i < (*other).count; i += 1) {
-    if ((*array).capacity == 0) {
-      (*array)._storage = realloc((*array)._storage, 1 * (*array).element_size);
-      (*array).capacity = 1;
-    }
-    if ((*array).count == (*array).capacity) {
-      (*array).capacity *= ARRAY_MULTIPLE_FACTOR;
-      var new_size = (*array).capacity * (*array).element_size;
-      (*array)._storage = realloc((*array)._storage, new_size);
-    }
-    (*array).count += 1;
-  }
-  
-  memcpy(
-    (*array)._storage + original_count * (*array).element_size,
-    (*other)._storage,
-    (*other).count * (*other).element_size
-  );
-}
+//void array_combine(struct Array* array, struct Array* other) {
+//  if (array->width != (*other).width) {
+//    return;
+//  }
+//  var original_count = array->count;
+//  array->is_empty = array->is_empty && (*other).is_empty;
+//  
+//  /* Dummy append for allocating spaces */
+//  var i = 0;
+//  for (i = 0; i < (*other).count; i += 1) {
+//    if (array->capacity == 0) {
+//      array->_storage = realloc(array->_storage, 1 * array->width);
+//      array->capacity = 1;
+//    }
+//    if (array->count == array->capacity) {
+//      array->capacity *= ARRAY_MULTIPLE_FACTOR;
+//      var new_size = array->capacity * array->width;
+//      array->_storage = realloc(array->_storage, new_size);
+//    }
+//    array->count += 1;
+//  }
+//  
+//  memcpy(
+//    array->_storage + original_count * array->width,
+//    (*other)._storage,
+//    (*other).count * (*other).width
+//  );
+//}
 
 /*===----------------------------------------------------------------------===*/
 /*             ___                            ___                             */

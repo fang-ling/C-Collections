@@ -1,7 +1,7 @@
 /*
  * This source file is part of the C Collections open source project
  *
- * Copyright (c) 2023 Fang Ling
+ * Copyright (c) 2024 Fang Ling
  * Licensed under Apache License v2.0
  *
  * See https://github.com/fang-ling/C-Collections/blob/main/LICENSE for license
@@ -11,11 +11,32 @@
 #ifndef array_h
 #define array_h
 
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <stdio.h> /* For printing error messages */
+
+#include <stddef.h> /* For size_t */
+
+#include "sort.h"
+
+#define var __auto_type
+
+#define ARRAY_MULTIPLE_FACTOR 2
+#define ARRAY_RESIZE_FACTOR   4
+
+#define ARRAY_FATAL_ERR_MALLOC "malloc() return a NULL pointer, check errno"
+#define ARRAY_FATAL_ERR_REALLO "realloc() return a NULL pointer, check errno"
+#define ARRAY_FATAL_ERR_REMEM  "Can't remove last element from an empty array"
+
 struct Array {
   void* _storage;
   
-  /* The number of elements in the array. */
-  int count;
+  /**
+   * The number of elements in the array.
+   */
+  size_t count;
   
   /*
    * The total number of elements that the array can contain without
@@ -31,88 +52,86 @@ struct Array {
    * have a performance cost, but they occur less and less often as the array
    * grows larger.
    */
-  int capacity;
+  size_t _capacity;
   
   /* The size of stored Element type. */
-  int element_size;
+  size_t _width;
   
-  /* A Boolean value indicating whether or not the array is empty. */
+  /**
+   * A Boolean value indicating whether the array is empty.
+   *
+   * When you need to check whether your array is empty, use the `is_empty`
+   * property instead of checking that the `count` property is equal to zero.
+   */
   bool is_empty;
 };
 
-/* Creates an empty array. */
-int array_init(struct Array* array, int element_size);
+/**
+ * Creates an empty array.
+ *
+ * `array_init()` allocates and initializes a Array structure.
+ *
+ * - Parameters:
+ *   - width: The size of stored Element type.
+ *
+ * - Returns: A pointer to the array initialized to be empty is returned. If the
+ * allocation fails, it returns NULL.
+ */
+struct Array* array_init(size_t width);
 
-/* Destroys an array. */
+/**
+ * Destroys an array.
+ *
+ * `array_deinit()` frees the components of the Array, and the structure
+ * itself. If `array` is a NULL pointer, no operation is performed.
+ *
+ * - Parameters:
+ *   - array: The array to be deinitialized.
+ */
 void array_deinit(struct Array* array);
 
-/* Returns the element at the specified position. */
-int array_get(struct Array* array, int index, void* element);
-
-/* Replaces the element at the specified position. */
-int array_set(struct Array* array, int index, void* element);
-
-/* Adds a new element at the end of the array. */
-int array_append(struct Array* array, void* element);
-
-/*
- * Inserts a new element at the specified position.
+/**
+ * Adds a new element at the end of the array.
  *
- * - Complexity:
- *   O(n), where n is the length of the array.
- */
-int array_insert(struct Array* array, void* element, int i);
-
-/* Removes the last element of the collection. */
-int array_remove_last(struct Array* array);
-
-/*
- * Removes the element at the specified position.
+ * Use this function to append a single element to the end of a mutable array.
  *
- * - Complexity:
- *   O(n), where n is the length of the array.
+ * Because arrays increase their allocated capacity using an exponential 
+ * strategy, appending a single element to an array is an _O(1)_ operation when
+ * averaged over many calls to the `array_append()` function.
+ * When an array has additional capacity, appending an element is _O(1)_. When
+ * an array needs to reallocate storage before appending, appending is _O(n)_,
+ * where _n_ is the length of the array.
+ *
+ * - Parameters:
+ *   - new_element: The element to append to the array.
  */
-int array_remove_at(struct Array* array, int i);
+void array_append(struct Array* array, void* new_element);
 
-/* Removes all the elements. */
-int array_remove_all(struct Array* array);
-
-/*
- * Returns a Boolean value indicating whether the sequence contains the given
- * element.
+/**
+ * Removes the last element of the array.
+ *
+ * The array must not be empty. This function does not destroy the removed
+ * element. If the stored type is a reference type, it is the caller's
+ * responsibility to handle its deallocation.
  */
-bool array_contains(
-  struct Array* array,
-  void* key,
-  bool (*equal)(const void*, const void*)
-);
+void array_remove_last(struct Array* array);
 
-/*
- * Returns the first index where the specified value appears in the collection.
+/**
+ * Removes all elements from the array.
  */
-int array_first_index(
-  struct Array* array,
-  void* key,
-  bool (*equal)(const void*, const void*)
-);
+void array_remove_all(struct Array* array);
 
-/* Sorts the collection in place. */
+/**
+ * Sorts the array in place.
+ *
+ * The contents of the array are sorted in ascending order according to
+ * a comparison function pointed to by `compare`, which requires two arguments
+ * pointing to the objects being compared.
+ *
+ * The comparison function must return an integer less than, equal to, or
+ * greater than zero if the first argument is considered to be respectively
+ * less than, equal to, or greater than the second.
+ */
 void array_sort(struct Array* array, int (*compare)(const void*, const void*));
-
-/* Exchanges the values at the specified indices of the collection. */
-int array_swap_at(struct Array* array, int i, int j);
-
-/*
- * Returns a Boolean value indicating whether two arrays contain the same
- * elements in the same order.
- */
-bool array_equal(
-  struct Array* lhs,
-  struct Array* rhs/*,
-  int (*elem_compare)(const void*, const void*)*/
-);
-
-/* Appends the elements of an array to this array. */
-void array_combine(struct Array* array, struct Array* other);
 
 #endif /* array_h */

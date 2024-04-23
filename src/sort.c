@@ -18,29 +18,13 @@
  * information
  */
 
-#include <stdlib.h>
-#include <stdbool.h>
+#include "sort.h"
 
 #define var __auto_type
 
-#define INS_THR 64
-
-/* Byte-wise swap two items of size SIZE. */
-#define SWAP(a, b, size)      \
-  do {                        \
-    unsigned __size = (size); \
-    char *__a = (a);          \
-    char *__b = (b);          \
-    do {                      \
-      char __tmp = *__a;      \
-      *__a++ = *__b;          \
-      *__b++ = __tmp;         \
-    } while (--__size > 0);   \
-  } while (0);
-
 static int partition(
   void* base,
-  int width,
+  size_t width,
   int p,
   int r,
   int (*compare)(const void*, const void*)
@@ -60,7 +44,7 @@ static int partition(
 
 static int randomized_partition(
   void* base,
-  int width,
+  size_t width,
   int p,
   int r,
   int (*compare)(const void*, const void*)
@@ -72,7 +56,7 @@ static int randomized_partition(
 
 static void _wkq_insertion_sort( 
   void* base,
-  int width,
+  size_t width,
   int p,
   int r,
   int (*compare)(const void*, const void*)
@@ -89,7 +73,7 @@ static void _wkq_insertion_sort(
 
 static void _wkq_quicksort(
   void* base,
-  int width,
+  size_t width,
   int p,
   int r,
   int (*compare)(const void*, const void*)
@@ -132,12 +116,12 @@ static void _wkq_quicksort(
 
 void sort(
   void* base, 
-  int nel,
-  int width,
+  size_t nel,
+  size_t width,
   int (*compare)(const void*, const void*)
 ) {
   srandom(1935819342);
-  _wkq_quicksort(base, width, 0, nel - 1, compare);
+  _wkq_quicksort(base, width, (int)0, (int)nel - 1, compare);
 }
 
 /*===----------------------------------------------------------------------===*/

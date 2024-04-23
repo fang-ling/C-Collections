@@ -11,28 +11,28 @@
 #ifndef binary_search_h
 #define binary_search_h
 
-/*
- * Returns the first position in which the new element cloud be inserted without
- * changing the ordering, or nel if no such element is found.
- */
-int lower_bound(
-  const void* key,
-  const void* base,
-  int nel,
-  int width,
-  int (*compare)(const void*, const void*)
-);
-
-/*
- * Returns a Boolean value indicating whether the sorted sequence contains the
- * given element.
- */
-bool binary_search(
-  const void* key,
-  const void* base,
-  int nel,
-  int width,
-  int (*compare)(const void*, const void*)
-);
+///*
+// * Returns the first position in which the new element cloud be inserted without
+// * changing the ordering, or nel if no such element is found.
+// */
+//int lower_bound(
+//  const void* key,
+//  const void* base,
+//  int nel,
+//  int width,
+//  int (*compare)(const void*, const void*)
+//);
+//
+///*
+// * Returns a Boolean value indicating whether the sorted sequence contains the
+// * given element.
+// */
+//bool binary_search(
+//  const void* key,
+//  const void* base,
+//  int nel,
+//  int width,
+//  int (*compare)(const void*, const void*)
+//);
 
 #endif /* binary_search_h */
