@@ -11,17 +11,14 @@
 #ifndef array_h
 #define array_h
 
-#include <stdbool.h>
+#include "types.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #include <stdio.h> /* For printing error messages */
 
-#include <stddef.h> /* For size_t */
-
 #include "sort.h"
-
-#define var __auto_type
 
 #define ARRAY_MULTIPLE_FACTOR 2
 #define ARRAY_RESIZE_FACTOR   4
@@ -36,7 +33,7 @@ struct Array {
   /**
    * The number of elements in the array.
    */
-  size_t count;
+  Int64 count;
   
   /*
    * The total number of elements that the array can contain without
@@ -52,10 +49,10 @@ struct Array {
    * have a performance cost, but they occur less and less often as the array
    * grows larger.
    */
-  size_t _capacity;
+  Int64 _capacity;
   
-  /* The size of stored Element type. */
-  size_t _width;
+  /* The size of stored Element type. (in-bytes) */
+  UInt32 _width;
   
   /**
    * A Boolean value indicating whether the array is empty.
@@ -63,9 +60,10 @@ struct Array {
    * When you need to check whether your array is empty, use the `is_empty`
    * property instead of checking that the `count` property is equal to zero.
    */
-  bool is_empty;
+  Bool is_empty;
 };
 
+/*----------------------------------------------------------------------------*/
 /**
  * Creates an empty array.
  *
@@ -77,7 +75,7 @@ struct Array {
  * - Returns: A pointer to the array initialized to be empty is returned. If the
  * allocation fails, it returns NULL.
  */
-struct Array* array_init(size_t width);
+struct Array* array_init(UInt32 width);
 
 /**
  * Destroys an array.
@@ -132,6 +130,10 @@ void array_remove_all(struct Array* array);
  * greater than zero if the first argument is considered to be respectively
  * less than, equal to, or greater than the second.
  */
-void array_sort(struct Array* array, int (*compare)(const void*, const void*));
+void array_sort(
+  struct Array* array,
+  Int32 (*compare)(const void*, const void*)
+);
+/*----------------------------------------------------------------------------*/
 
 #endif /* array_h */

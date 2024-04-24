@@ -30,7 +30,7 @@
  * 6: Can't remove last element from an empty collection
  */
 
-static void _array_init(struct Array* array, size_t count, size_t width) {
+static void _array_init(struct Array* array, Int64 count, UInt32 width) {
   /* Rounding up to next power of 2 */
   var capacity = count - 1;
   capacity |= capacity >> 1;
@@ -56,18 +56,18 @@ static void _array_init(struct Array* array, size_t count, size_t width) {
 }
 
 /* Check that the specified `index` is valid, i.e. `0 ≤ index < count`. */
-static int _check_index(struct Array* array, int index) {
-  if (index >= array->count) {
-    return 2;
-  } else if (index < 0) {
-    return 3;
-  }
-  return 0;
-}
+//static int _check_index(struct Array* array, Int64 index) {
+//  if (index >= array->count) {
+//    return 2;
+//  } else if (index < 0) {
+//    return 3;
+//  }
+//  return 0;
+//}
 
 /* MARK: - Creating and Destroying an Array */
 
-struct Array* array_init(size_t width) {
+struct Array* array_init(UInt32 width) {
   struct Array* array;
   if ((array = malloc(sizeof(struct Array))) == NULL) {
     return NULL;
@@ -204,7 +204,7 @@ void array_remove_last(struct Array* array) {
     array->_capacity /= ARRAY_MULTIPLE_FACTOR;
     var new_size = array->_capacity * array->_width;
     array->_storage = realloc(array->_storage, new_size);
-    if (array->_storage == NULL) {
+    if (array->_storage == NULL && new_size != 0) { /* Linux fix */
       fprintf(stderr, ARRAY_FATAL_ERR_REALLO);
       abort();
     }
@@ -301,7 +301,10 @@ void array_remove_all(struct Array* array) {
 
 /* MARK: - Reordering an Array’s Elements */
 
-void array_sort(struct Array* array, int (*compare)(const void*, const void*)) {
+void array_sort(
+  struct Array* array,
+  Int32 (*compare)(const void*, const void*)
+) {
   if (array->count <= 1) {
     return;
   }
