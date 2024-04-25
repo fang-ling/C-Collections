@@ -11,54 +11,66 @@
 #ifndef string_h
 #define string_h
 
-//struct String {
-//  /* A buffer of a string’s contents as a collection of UTF-8 code units. */
-//  char utf8[STRING_MAX_LENGTH];
-//  int utf8_count;
-//  /* The number of characters in a string. */
-//  int count;
-//  /* A Boolean value indicating whether a string has no characters. */
-//  bool is_empty;
-//};
-//
-///* Creates an empty string. */
-//void string_init(struct String* str);
-//
-///*
-// * Creates a string from the null-terminated character sequence (C-string)
-// * pointed by s.
-// */
-//void string_init_c_string(struct String* str, const char* s);
-//
-///* Destroys a string. */
-////void string_deinit(struct String* str);
-//
-///* Appends the given string to this string. */
-////void string_append(struct String* str, struct String* other);
-//
-///*
-// * Appends the null-terminated character sequence (C-string) pointed by other
-// * to this string.
-// */
-////void string_append_c_string(struct String* str, const char* other);
-//
-///*
-// * Returns an array containing substrings from the string that have been divided
-// * by the given separator.
-// * It's caller's responsibility to free the strings stored in the result.
-// */
-////void string_components_c_string(
-////  struct String* str,
-////  const char* separator,
-////  struct Array* result
-////);
-//
-///* Accesses a contiguous substring of the string’s elements. */
-//void string_substring(
-//  struct String* str,
-//  int start,
-//  int end,
-//  struct String* substring
-//);
+#include "types.h"
+
+#include <stdlib.h>
+
+#include "array.h"
+
+struct String {
+  /*
+   * A buffer for storing UTF-8 string as an array of uint32 numbers.
+   * In UTF-8 encoding, characters are represented by variable-length code 
+   * units. The code units for a single character are "concatenated" together to
+   * form a single uint32 number. This allows easy implementation of functions
+   * for manipulating multi-language strings.
+   */
+  UInt32* _utf8;
+  
+  /* The length of each unicode character. */
+  Int32* _utf8_length;
+  
+//  Int64 _utf8_count;
+  
+  Int64 _utf8_capacity;
+  
+  /* The number of (unicode) characters in a string. */
+  Int64 count;
+  
+  /* A Boolean value indicating whether a string has no characters. */
+  Bool is_empty;
+};
+
+/*----------------------------------------------------------------------------*/
+/*
+ * Creates a string from the null-terminated character sequence (C-string)
+ * pointed by s.
+ */
+struct String* string_init(const char* s);
+
+/* Destroys a string. */
+void string_deinit(struct String* string);
+
+/* Returns a representation of the string as a C string using utf-8 encoding. */
+void string_c_string(struct String* string, char* result);
+
+struct String* string_substring(
+  struct String* string,
+  Int64 start,
+  Int64 end
+);
+
+void string_components(
+  struct String* string,
+  struct String* separator,
+  struct Array* result
+);
+
+/*
+ * Returns an integer greater than, equal to, or less than 0, according as the
+ * string lhs is greater than, equal to, or less than the string rhs.
+ */
+Int32 string_compare_ascii(const void* lhs, const void* rhs);
+/*----------------------------------------------------------------------------*/
 
 #endif /* string_h */

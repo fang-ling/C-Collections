@@ -26,6 +26,7 @@
 #define ARRAY_FATAL_ERR_MALLOC "malloc() return a NULL pointer, check errno"
 #define ARRAY_FATAL_ERR_REALLO "realloc() return a NULL pointer, check errno"
 #define ARRAY_FATAL_ERR_REMEM  "Can't remove last element from an empty array"
+#define ARRAY_FATAL_ERR_OUTOB  "Index out of range"
 
 struct Array {
   void* _storage;
@@ -134,6 +135,12 @@ void array_sort(
   struct Array* array,
   Int32 (*compare)(const void*, const void*)
 );
+
+/* Returns the element at the specified position. */
+void array_get(struct Array* array, Int64 index, void* element);
+
+/* Replaces the element at the specified position. */
+void array_set(struct Array* array, Int64 index, void* element);
 /*----------------------------------------------------------------------------*/
 
 #endif /* array_h */

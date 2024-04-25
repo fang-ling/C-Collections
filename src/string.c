@@ -18,17 +18,7 @@
  * information
  */
 
-#include <string.h>
-#include <stdbool.h>
-#include <stdlib.h>
-
-/*
- * The maximum length of a string and can be modified by the user according to
- * their specific requirements.
- */
-#define STRING_MAX_LENGTH 0
-
-#define var __auto_type
+#include "string.h"
 
 static char const WKQ_UTF8_LEN[] = {
 /* 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F */
@@ -36,115 +26,72 @@ static char const WKQ_UTF8_LEN[] = {
 };
 #define WKQUTF8LEN(c) WKQ_UTF8_LEN[((c) & 0xFF) >> 4]
 
-struct String {
-  /* A buffer of a string’s contents as a collection of UTF-8 code units. */
-  char utf8[STRING_MAX_LENGTH];
-  int utf8_count;
-  /* The number of characters in a string. */
-  int count;
-  /* A Boolean value indicating whether a string has no characters. */
-  bool is_empty;
-};
-
-/*-
- * SPDX-License-Identifier: BSD-3-Clause
- *
- * Copyright (c) 2001 Mike Barcroft <mike@FreeBSD.org>
- * Copyright (c) 1990, 1993
- *  The Regents of the University of California.  All rights reserved.
- *
- * This code is derived from software contributed to Berkeley by
- * Chris Torek.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
-
-/*
- * Find the first occurrence of find in s, where the search is limited to the
- * first slen characters of s.
- */
-static char* wkq_strnstr(const char* s, const char* find, int slen) {
-  char c, sc;
-  int len;
-  
-  if ((c = *find++) != '\0') {
-    len = (int)strlen(find);
-    do {
-      do {
-        if (slen-- < 1 || (sc = *s++) == '\0')
-          return (NULL);
-      } while (sc != c);
-      if (len > slen)
-        return (NULL);
-    } while (strncmp(s, find, len) != 0);
-    s--;
+struct String* _string_init(UInt32* _utf8, Int32* _utf8_length, Int64 count) {
+  struct String* string;
+  if ((string = malloc(sizeof(struct String))) == NULL) {
+    return NULL;
   }
-  return ((char *)s);
+  
+  string->_utf8_capacity = count;
+  string->count = count;
+  
+  if (string->_utf8_capacity > 0) {
+    string->is_empty = false;
+  }
+  
+  string->_utf8 = malloc(sizeof(UInt32) * string->_utf8_capacity);
+  string->_utf8_length = malloc(sizeof(Int32) * string->_utf8_capacity);
+  
+  memcpy(string->_utf8, _utf8, sizeof(UInt32) * count);
+  memcpy(string->_utf8_length, _utf8_length, sizeof(Int32) * count);
+  
+  return string;
 }
 
 /* MARK: - Creating and Destroying a String */
 
-/* Creates an empty string. */
-void string_init(struct String* str) {
-  (*str).count = 0;
-  (*str).is_empty = true;
-  (*str).utf8_count = 0;
-  /* array_init(&(*str).utf8, sizeof(char)); */
-}
-
-/*
- * Creates a string from the null-terminated character sequence (C-string) 
- * pointed by s.
- */
-void string_init_c_string(struct String* str, const char* s) {
-  string_init(str);
+struct String* string_init(const char* s) {
+  struct String* string;
+  if ((string = malloc(sizeof(struct String))) == NULL) {
+    return NULL;
+  }
   
+  /* Calculate capacity & is_empty */
+  string->_utf8_capacity = 0;
   var _s = s;
-  var t = (*str).utf8;
   while (*_s != '\0') {
-    var code_len = WKQUTF8LEN(*_s);
-    (*str).count += 1;
-    while (code_len--) {
-      /* array_append(&(*str).utf8, (void*)_s); */
-      *t = *_s;
-      (*str).utf8_count += 1;
+    string->_utf8_capacity += 1;
+    _s += WKQUTF8LEN(*_s);
+  }
+  if (string->_utf8_capacity > 0) {
+    string->is_empty = false;
+  }
+  
+  string->_utf8 = malloc(sizeof(UInt32) * string->_utf8_capacity);
+  string->_utf8_length = malloc(sizeof(UInt32) * string->_utf8_capacity);
+  
+  _s = s;
+  string->count = 0;
+  while (*_s != '\0') {
+    var len = WKQUTF8LEN(*_s);
+    string->_utf8[string->count] = 0;
+    string->_utf8_length[string->count] = len;
+    var i = 0;
+    for (i = 0; i < len; i += 1) {
+      string->_utf8[string->count] |= (((UInt32)(UInt8)*_s) << (i * 8));
       _s += 1;
-      t += 1;
     }
+    string->count += 1;
   }
-  if ((*str).count > 0) {
-    (*str).is_empty = false;
-  }
+
+  return string;
 }
 
-/* Destroys a string. (You don't need to) */
-/*void string_deinit(struct String* str) {
-  array_deinit(&(*str).utf8);
-  (*str).count = 0;
-  (*str).is_empty = true;
-}*/
+void string_deinit(struct String* string) {
+  free(string->_utf8);
+  free(string->_utf8_length);
+  free(string);
+}
 
 /* MARK: - Appending Strings and Characters */
 
@@ -172,6 +119,30 @@ void string_init_c_string(struct String* str, const char* s) {
   string_deinit(&s);
 }*/
 
+/* MARK: - Getting Substrings */
+
+/* 
+ * Returns a new contiguous substring of the string.
+ *
+ * It's caller's responsibility to free the returned value.
+ *
+ * Returns NULL if the start is negative, or end is larger than the length of
+ * this string object, or start is larger than end.
+ */
+struct String* string_substring(
+  struct String* string,
+  Int64 start,
+  Int64 end
+) {
+  if (start < 0 || end > string->count || start > end) {
+    return NULL;
+  }
+  
+  var _utf8 = string->_utf8 + start;
+  var _utf8_length = string->_utf8_length + start;
+  return _string_init(_utf8, _utf8_length, end - start);
+}
+
 /* MARK: - Splitting a String */
 
 /*
@@ -179,93 +150,54 @@ void string_init_c_string(struct String* str, const char* s) {
  * by the given separator.
  * It's caller's responsibility to free the strings stored in the result.
  */
-/*
+/* Example:
  *                    1                 2    3             4
  * Assuming: str = "#zyy#jasdjq2n3oasd#zyy##zyy#adn972929#zyy#"
  *           separator = "#zyy#"
  *      will return 5 substrings.
  */
-/*void string_components_c_string(
-  struct String* str,
-  const char* separator,
-  struct Array* result
-) {
-  var separator_len = (int)strlen(separator);
-  
-  char* tofree;
-  var s = (char*)malloc(sizeof(char) * ((*str).utf8.count + 1 + separator_len));
-  tofree = s;
-  memcpy(s, (*str).utf8._storage, sizeof(char) * (*str).utf8.count);*/
-  /* Append the dummy separator */
-  /*memcpy(s + (*str).utf8.count, separator, separator_len);
-  s[(*str).utf8.count + separator_len] = '\0';
-  
-  var substr_end = 0;
-  var last_len = 0;
-  var remaining_len = (*str).utf8.count + separator_len;
-  
-  char* i_p;
-  while ((i_p = wkq_strnstr(s, separator, remaining_len)) != NULL) {
-    remaining_len -= last_len;
-    
-    substr_end = (int)(i_p - s);
-    s[substr_end] = '\0';
-    last_len = (int)strlen(s);
-    
-    struct String new_str;
-    string_init_c_string(&new_str, s);
-    array_append(result, &new_str);*/
-    /* Let the caller to call string_deinit(&new_str); */
-    /*s += last_len;
-    s += separator_len;
-    remaining_len -= separator_len;
-  }
-  
-  free(tofree);
-}*/
-
-/*void string_components(
-  struct String* str,
+void string_components(
+  struct String* string,
   struct String* separator,
   struct Array* result
 ) {
+  var last_index = 0ll;
   
-}*/
-
+  if (separator->count != 0) {
+    var i = 0;
+    var length = string->count - separator->count + 1;
+    for (i = 0; i < length; i += 1) {
+      var j = 0;
+      while (
+             j < separator->count &&
+             string->_utf8[i + j] == separator->_utf8[j]
+             ) {
+               j += 1;
+             }
+      if (j == separator->count) { /* Find a match at i */
+        var substring = string_substring(string, last_index, i);
+        array_append(result, &substring);
+        last_index += separator->count + substring->count;
+      }
+    }
+  }
+  /* Add the remaining substring */
+  var substring = string_substring(string, last_index, string->count);
+  array_append(result, &substring);
+}
 
 /* MARK: - Getting C Strings */
 
-/* Returns a representation of the string as a C string using utf-8 encoding. */
-/*void string_c_string(struct String* str, char* result) {
-  memcpy(result, (*str).utf8._storage, (*str).utf8.count);
-  result[(*str).utf8.count] = '\0';
-}*/
-
-/* MARK: - Getting Substrings */
-
-/* Accesses a contiguous substring of the string’s elements. */
-void string_substring(
-  struct String* str,
-  int start,
-  int end,
-  struct String* substring
-) {
-  end += 1;
-  
-  var start_index = 0;
-  while (start--) {
-    start_index += WKQUTF8LEN((*str).utf8[start_index]);
+void string_c_string(struct String* string, char* result) {
+  var i = 0;
+  for (i = 0; i < string->count; i += 1) {
+    var j = 0;
+    for (j = 0; j < string->_utf8_length[i]; j += 1) {
+      *result = (UInt8)(string->_utf8[i] >> (j * 8));
+      result += 1;
+    }
   }
-  var end_index = 0;
-  while (end--) {
-    end_index += WKQUTF8LEN((*str).utf8[start_index]);
-  }
-  
-  var buf = (char*)malloc(sizeof(char) * (end_index - start_index + 1));
-  memcpy(buf, (*str).utf8 + start_index, end_index - start_index - 1);
-  buf[end_index - start_index] = '\0';
-  string_init_c_string(substring, buf);
-  free(buf);
+  *result = '\0';
 }
 
 /* MARK: - Comparing Strings */
@@ -274,12 +206,24 @@ void string_substring(
  * Returns an integer greater than, equal to, or less than 0, according as the
  * string lhs is greater than, equal to, or less than the string rhs.
  */
-int string_compare(const void* lhs, const void* rhs) {
-  var a = *(struct String*)lhs;
-  var b = *(struct String*)rhs;
-  a.utf8[a.utf8_count] = '\0';
-  b.utf8[b.utf8_count] = '\0';
-  return strcmp(a.utf8, b.utf8);
+Int32 string_compare_ascii(const void* lhs, const void* rhs) {
+  var a = (struct String*)lhs;
+  var b = (struct String*)rhs;
+  
+  var lim = a->count < b->count ? a->count : b->count;
+  
+  /* Find the first mismatch */
+  var i = 0;
+  for (i = 0; i < lim; i += 1) {
+    if (a->_utf8[i] != b->_utf8[i]) {
+      break;
+    }
+  }
+  if (i == lim) { /* no mismatch founded */
+    return (Int32)(a->count - b->count);
+  } else {
+    return ((Int32)a->_utf8[i]) - ((Int32)b->_utf8[i]);
+  }
 }
 
 /*===----------------------------------------------------------------------===*/

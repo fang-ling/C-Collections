@@ -56,14 +56,12 @@ static void _array_init(struct Array* array, Int64 count, UInt32 width) {
 }
 
 /* Check that the specified `index` is valid, i.e. `0 ≤ index < count`. */
-//static int _check_index(struct Array* array, Int64 index) {
-//  if (index >= array->count) {
-//    return 2;
-//  } else if (index < 0) {
-//    return 3;
-//  }
-//  return 0;
-//}
+static void _array_check_index(struct Array* array, Int64 index) {
+  if (index >= array->count || index < 0) {
+    fprintf(stderr, ARRAY_FATAL_ERR_OUTOB);
+    abort();
+  }
+}
 
 /* MARK: - Creating and Destroying an Array */
 
@@ -93,32 +91,26 @@ void array_deinit(struct Array* array) {
 /* MARK: - Accessing Elements */
 
 /* Returns the element at the specified position. */
-//int array_get(struct Array* array, int index, void* element) {
-//  var err = _check_index(array, index);
-//  if (err != 0) {
-//    return err;
-//  }
-//  memcpy(
-//    element,
-//    array->_storage + array->width * index,
-//    array->width
-//  );
-//  return err;
-//}
+void array_get(struct Array* array, Int64 index, void* element) {
+  _array_check_index(array, index);
+  
+  memcpy(
+    element,
+    array->_storage + array->_width * index,
+    array->_width
+  );
+}
 
 /* Replaces the element at the specified position. */
-//int array_set(struct Array* array, int index, void* element) {
-//  var err = _check_index(array, index);
-//  if (err != 0) {
-//    return err;
-//  }
-//  memcpy(
-//    array->_storage + array->width * index,
-//    element,
-//    array->width
-//  );
-//  return err;
-//}
+void array_set(struct Array* array, Int64 index, void* element) {
+  _array_check_index(array, index);
+
+  memcpy(
+    array->_storage + array->_width * index,
+    element,
+    array->_width
+  );
+}
 
 /* MARK: - Adding Elements */
 
