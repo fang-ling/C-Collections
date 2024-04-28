@@ -99,4 +99,32 @@
   string_deinit(s2);
 }
 
+- (void) test_to_int64 {
+  var s1 = string_init("0x3f3f3f3f3f3f3f3fLL");
+  var s2 = string_init("1001");
+  var s3 = string_init("-238124712831290LL");
+  var outofrange = string_init("9999999999999999999999999999999999999999");
+  var invalid = string_init("TRACY");
+  
+  var r = 0LL;
+  XCTAssertEqual(string_to_int64(s1, 16, &r), 0);
+  XCTAssertEqual(r, 0x3f3f3f3f3f3f3f3fLL);
+  
+  XCTAssertEqual(string_to_int64(s2, 2, &r), 0);
+  XCTAssertEqual(r, 9);
+  
+  XCTAssertEqual(string_to_int64(s3, 10, &r), 0);
+  XCTAssertEqual(r, -238124712831290LL);
+  
+  XCTAssertEqual(string_to_int64(outofrange, 10, &r), 1);
+  
+  XCTAssertEqual(string_to_int64(invalid, 10, &r), -1);
+  
+  string_deinit(s1);
+  string_deinit(s2);
+  string_deinit(s3);
+  string_deinit(outofrange);
+  string_deinit(invalid);
+}
+
 @end

@@ -13,7 +13,11 @@
 
 #include "types.h"
 
+#define WKQ_INT64_MAX       0x7fffffffffffffffLL      /* max signed long long */
+#define WKQ_INT64_MIN       (-0x7fffffffffffffffLL-1) /* min signed long long */
+
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "array.h"
 
@@ -29,8 +33,6 @@ struct String {
   
   /* The length of each unicode character. */
   Int32* _utf8_length;
-  
-//  Int64 _utf8_count;
   
   Int64 _utf8_capacity;
   
@@ -71,6 +73,8 @@ void string_components(
  * string lhs is greater than, equal to, or less than the string rhs.
  */
 Int32 string_compare_ascii(const void* lhs, const void* rhs);
+
+Int32 string_to_int64(struct String* string, Int32 base, Int64* result);
 /*----------------------------------------------------------------------------*/
 
 #endif /* string_h */
