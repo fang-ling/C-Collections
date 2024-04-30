@@ -32,7 +32,12 @@
   
   XCTAssertEqual(0, strcmp(buf, c_str));
   
+  var empty = string_init("");
+  XCTAssertEqual(empty->count, 0);
+  XCTAssertTrue(empty->is_empty);
+  
   string_deinit(string);
+  string_deinit(empty);
 }
 
 - (void) test_components {
@@ -125,6 +130,93 @@
   string_deinit(s3);
   string_deinit(outofrange);
   string_deinit(invalid);
+}
+
+- (void) test_contains {
+  var string = string_init("1 + 1 = 2");
+  var another = string_init("=");
+  var another2 = string_init("==");
+  
+  XCTAssertTrue(string_contains(string, another));
+  XCTAssertFalse(string_contains(string, another2));
+  
+  string_deinit(string);
+  string_deinit(another);
+}
+
+- (void) test_first_index_of {
+  var s1 = string_init("Hello, World");
+  var m11 = string_init("o");
+  var m12 = string_init("z");
+  var s2 = string_init("Tracy  is ...");
+  var m21 = string_init("is");
+  var m22 = string_init("Diana");
+  var empty = string_init("");
+  
+  /* Substring found */
+  XCTAssertEqual(string_first_index_of(s1, m11), 4);
+  XCTAssertEqual(string_first_index_of(s2, m21), 7);
+  
+  /* Substring not found */
+  XCTAssertEqual(string_first_index_of(s1, m12), -1);
+  XCTAssertEqual(string_first_index_of(s2, m22), -1);
+  
+  /* Empty string */
+  XCTAssertEqual(string_first_index_of(empty, empty), -1);
+  XCTAssertEqual(string_first_index_of(empty, m11), -1);
+  XCTAssertEqual(string_first_index_of(s1, empty), -1);
+  
+  /* Substring is the entire string */
+  XCTAssertEqual(string_first_index_of(s1, s1), 0);
+  
+  string_deinit(s1);
+  string_deinit(m11);
+  string_deinit(m12);
+  string_deinit(s2);
+  string_deinit(m21);
+  string_deinit(m22);
+  string_deinit(empty);
+}
+
+- (void) test_last_index_of {
+  var s1 = string_init("Hello, World");
+  var m11 = string_init("o");
+  var m12 = string_init("z");
+  var s2 = string_init("Tracy  is ...");
+  var m21 = string_init("is");
+  var m22 = string_init("Diana");
+  var empty = string_init("");
+  var s3 = string_init("foo bar foo baz");
+  var m3 = string_init("foo");
+  
+  /* Substring found */
+  XCTAssertEqual(string_last_index_of(s1, m11), 8);
+  XCTAssertEqual(string_last_index_of(s2, m21), 7);
+  
+  /* Substring not found */
+  XCTAssertEqual(string_last_index_of(s1, m12), -1);
+  XCTAssertEqual(string_last_index_of(s2, m22), -1);
+  
+  /* Empty string */
+  XCTAssertEqual(string_last_index_of(empty, empty), -1);
+  XCTAssertEqual(string_last_index_of(empty, m11), -1);
+  XCTAssertEqual(string_last_index_of(s1, empty), -1);
+  
+  /* Substring is the entire string */
+  XCTAssertEqual(string_last_index_of(s1, s1), 0);
+  
+  /* Multiple occurrences of the substring */
+  XCTAssertEqual(string_last_index_of(s3, m3), 8);
+  
+  string_deinit(s1);
+  string_deinit(m11);
+  string_deinit(m12);
+  string_deinit(s2);
+  string_deinit(m21);
+  string_deinit(m22);
+  string_deinit(empty);
+  string_deinit(s3);
+  string_deinit(m3);
 }
 
 @end

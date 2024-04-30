@@ -26,7 +26,11 @@ static char const WKQ_UTF8_LEN[] = {
 };
 #define WKQUTF8LEN(c) WKQ_UTF8_LEN[((c) & 0xFF) >> 4]
 
-struct String* _string_init(UInt32* _utf8, Int32* _utf8_length, Int64 count) {
+static struct String* _string_init(
+  UInt32* _utf8,
+  Int32* _utf8_length,
+  Int64 count
+) {
   struct String* string;
   if ((string = malloc(sizeof(struct String))) == NULL) {
     return NULL;
@@ -184,6 +188,7 @@ struct String* string_init(const char* s) {
   }
   
   /* Calculate capacity & is_empty */
+  string->is_empty = true;
   string->_utf8_capacity = 0;
   var _s = s;
   while (*_s != '\0') {
@@ -296,11 +301,11 @@ void string_components(
     for (i = 0; i < length; i += 1) {
       var j = 0;
       while (
-             j < separator->count &&
-             string->_utf8[i + j] == separator->_utf8[j]
-             ) {
-               j += 1;
-             }
+        j < separator->count &&
+        string->_utf8[i + j] == separator->_utf8[j]
+      ) {
+        j += 1;
+      }
       if (j == separator->count) { /* Find a match at i */
         var substring = string_substring(string, last_index, i);
         array_append(result, &substring);
@@ -371,6 +376,59 @@ Int32 string_to_int64(struct String* string, Int32 base, Int64* result) {
   
   return ret;
 }
+
+/* MARK: - Finding Characters */
+
+/* Returns the first index where the specified value appears in the string. */
+Int64 string_first_index_of(struct String* string, struct String* value) {
+  if (value->is_empty) { /* Special case for empty value */
+    return -1;
+  }
+  
+  var i = 0;
+  var length = string->count - value->count + 1;
+  for (i = 0; i < length; i += 1) {
+    var j = 0;
+    while (j < value->count && string->_utf8[i + j] == value->_utf8[j]) {
+      j += 1;
+    }
+    if (j == value->count) { /* Find a match at i */
+      return i;
+    }
+  }
+  return -1;
+}
+
+/* Returns the last index where the specified value appears in the string. */
+Int64 string_last_index_of(struct String* string, struct String* value) {
+  /* Special case for empty value & string */
+  if (value->is_empty || string->is_empty) {
+    return -1;
+  }
+  
+  var i = 0ll;
+  var length = string->count - value->count + 1;
+  for (i = length - 1; i >= 0; i -= 1) {
+    var j = 0;
+    while (j < value->count && string->_utf8[i + j] == value->_utf8[j]) {
+      j += 1;
+    }
+    if (j == value->count) { /* Find a match at i */
+      return i;
+    }
+  }
+  return -1;
+}
+
+/*
+ * Returns a Boolean value indicating whether the sequence contains the given
+ * string.
+ */
+Bool string_contains(struct String* string, struct String* another) {
+  return !(string_first_index_of(string, another) == -1);
+}
+
+/* MARK: - Accessing Elements */
 
 /*===----------------------------------------------------------------------===*/
 /*             ___                            ___                             */

@@ -75,6 +75,12 @@ void string_components(
 Int32 string_compare_ascii(const void* lhs, const void* rhs);
 
 Int32 string_to_int64(struct String* string, Int32 base, Int64* result);
+
+Bool string_contains(struct String* string, struct String* another);
+
+Int64 string_last_index_of(struct String* string, struct String* value);
+
+Int64 string_first_index_of(struct String* string, struct String* value);
 /*----------------------------------------------------------------------------*/
 
 #endif /* string_h */
