@@ -36,8 +36,19 @@
   XCTAssertEqual(empty->count, 0);
   XCTAssertTrue(empty->is_empty);
   
+  buf[0] = '\0';
+  var empty2 = string_init(buf);
+  XCTAssertEqual(empty2->count, 0);
+  XCTAssertTrue(empty2->is_empty);
+  
+  var empty3 = string_substring(string, 15, 15);
+  XCTAssertEqual(empty3->count, 0);
+  XCTAssertTrue(empty3->is_empty);
+  
   string_deinit(string);
   string_deinit(empty);
+  string_deinit(empty2);
+  string_deinit(empty3);
 }
 
 - (void) test_components {
@@ -87,9 +98,9 @@
   var s2 = string_init("10");
   var s3 = string_init("2");
   
-  XCTAssertTrue(string_compare_ascii(s1, s2) < 0);
-  XCTAssertTrue(string_compare_ascii(s2, s3) < 0);
-  XCTAssertTrue(string_compare_ascii(s3, s1) > 0);
+  XCTAssertTrue(string_compare_ascii(&s1, &s2) < 0);
+  XCTAssertTrue(string_compare_ascii(&s2, &s3) < 0);
+  XCTAssertTrue(string_compare_ascii(&s3, &s1) > 0);
   
   string_deinit(s1);
   string_deinit(s2);
@@ -98,7 +109,7 @@
   s1 = string_init("cat");
   s2 = string_init("dog");
   
-  XCTAssertTrue(string_compare_ascii(s1, s2) < 0);
+  XCTAssertTrue(string_compare_ascii(&s1, &s2) < 0);
   
   string_deinit(s1);
   string_deinit(s2);

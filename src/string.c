@@ -39,6 +39,7 @@ static struct String* _string_init(
   string->_utf8_capacity = count;
   string->count = count;
   
+  string->is_empty = true; /* set initial value */
   if (string->_utf8_capacity > 0) {
     string->is_empty = false;
   }
@@ -339,8 +340,12 @@ void string_c_string(struct String* string, char* result) {
  * string lhs is greater than, equal to, or less than the string rhs.
  */
 Int32 string_compare_ascii(const void* lhs, const void* rhs) {
-  var a = (struct String*)lhs;
-  var b = (struct String*)rhs;
+  if (lhs == rhs) {
+    return 0;  // Equal pointers, return 0
+  }
+  
+  var a = *(struct String**)lhs;
+  var b = *(struct String**)rhs;
   
   var lim = a->count < b->count ? a->count : b->count;
   
