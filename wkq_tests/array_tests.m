@@ -11,6 +11,7 @@
 #import <XCTest/XCTest.h>
 
 #import "array.h"
+#import "string.h"
 
 #define var __auto_type
 
@@ -102,6 +103,31 @@
 
   array_deinit(array);
   array_deinit(result);
+}
+
+- (void) test_sort_string {
+  var array = array_init(sizeof(struct String*));
+  
+  struct String* input[5];
+  input[0] = string_init("1");
+  input[1] = string_init("3");
+  input[2] = string_init("5");
+  input[3] = string_init("7");
+  input[4] = string_init("9");
+  
+  for (var i = 4; i >= 0; i -= 1) {
+    array_append(array, &input[i]);
+  }
+  
+  array_sort(array, string_compare_ascii);
+  
+  for (var i = 0; i < 5; i += 1) {
+    struct String* string;
+    array_get(array, i, &string);
+    XCTAssertEqual(string_compare_ascii(string, input[i]), 0);
+  }
+  
+  array_deinit(array);
 }
 
 static int compare(const void* a, const void* b) {

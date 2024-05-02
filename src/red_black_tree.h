@@ -42,7 +42,7 @@ struct RedBlackTreeNode {
 
 struct RedBlackTree {
   struct RedBlackTreeNode* root;
-  struct RedBlackTreeNode* nil;
+  struct RedBlackTreeNode* null;
   
   UInt32 _width;
   

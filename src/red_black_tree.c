@@ -70,11 +70,11 @@ static void _red_black_tree_rotate(
 ) {
   var y = x->children[is_right ^ 1];
   x->children[is_right ^ 1] = y->children[is_right];
-  if (y->children[is_right] != tree->nil) {
+  if (y->children[is_right] != tree->null) {
     y->children[is_right]->p = x;
   }
   y->p = x->p;
-  if (x->p == tree->nil) {
+  if (x->p == tree->null) {
     tree->root = y;
   } else {
     x->p->children[x == x->p->children[1] ? 1 : 0] = y;
@@ -196,7 +196,7 @@ static void _red_black_tree_transplant(
   struct RedBlackTreeNode* u,
   struct RedBlackTreeNode* v
 ) {
-  if (u->p == tree->nil){
+  if (u->p == tree->null){
     tree->root = v;
   } else {
     u->p->children[(u == u->p->children[0]) ? 0 : 1] = v;
@@ -208,7 +208,7 @@ static struct RedBlackTreeNode* _red_black_tree_minimum(
   struct RedBlackTree* tree,
   struct RedBlackTreeNode* x
 ) {
-  while (x->children[0] != tree->nil) {
+  while (x->children[0] != tree->null) {
     x = x->children[0];
   }
   return x;
@@ -218,7 +218,7 @@ static struct RedBlackTreeNode* _red_black_tree_maximum(
   struct RedBlackTree* tree,
   struct RedBlackTreeNode* x
 ) {
-  while (x->children[1] != tree->nil) {
+  while (x->children[1] != tree->null) {
     x = x->children[1];
   }
   return x;
@@ -355,7 +355,7 @@ static void _red_black_tree_deinit(
   struct RedBlackTree* tree,
   struct RedBlackTreeNode* node
 ) {
-  if (node != tree->nil) {
+  if (node != tree->null) {
     _red_black_tree_deinit(tree, node->children[0]);
     _red_black_tree_deinit(tree, node->children[1]);
     _red_black_tree_node_deinit(node);
@@ -381,7 +381,7 @@ struct RedBlackTree* red_black_tree_init(
   tree->allow_duplicates = allow_duplicates;
   tree->compare = compare;
   
-  tree->nil = _red_black_tree_node_init(
+  tree->null = _red_black_tree_node_init(
     NULL,         /* key */
     width,        /* width */
     0,            /* size */
@@ -391,8 +391,8 @@ struct RedBlackTree* red_black_tree_init(
     NULL,         /* p */
     RBT_BLACK     /* color */
   );
-  tree->root = tree->nil;
-  tree->root->p = tree->nil;
+  tree->root = tree->null;
+  tree->root->p = tree->null;
   
   return tree;
 }
@@ -400,7 +400,7 @@ struct RedBlackTree* red_black_tree_init(
 /* Destroys a RedBlackTree. (postorder tree traversal) */
 void red_black_tree_deinit(struct RedBlackTree* tree) {
   _red_black_tree_deinit(tree, tree->root);
-  _red_black_tree_node_deinit(tree->nil);
+  _red_black_tree_node_deinit(tree->null);
   
   free(tree);
 }
@@ -414,20 +414,22 @@ void red_black_tree_insert(struct RedBlackTree* tree, const void* key) {
    * by calling insert_fixup().
    */
   var x = tree->root;
-  var y = tree->nil;
+  var y = tree->null;
   var z = _red_black_tree_node_init(
     key,                  /* key */
     tree->_width,         /* width */
     1,                    /* size */
     1,                    /* count */
-    tree->nil,            /* left */
-    tree->nil,            /* right */
-    tree->nil,            /* p */
+    tree->null,            /* left */
+    tree->null,            /* right */
+    tree->null,            /* p */
     RBT_RED /* color */
   );
-  while (x != tree->nil) { /* Find the position to insert */
+  while (x != tree->null) { /* Find the position to insert */
     y = x;
-    y->size += 1;
+    if (tree->allow_duplicates) {
+      y->size += 1;
+    }
     /* If exists, add `count` by 1. */
     if (tree->compare(x->key, key) == 0) {
       if (tree->allow_duplicates) {
@@ -439,7 +441,7 @@ void red_black_tree_insert(struct RedBlackTree* tree, const void* key) {
     x = x->children[(tree->compare(x->key, key) < 0) ? 1 : 0];
   }
   z->p = y;
-  if (y == tree->nil) {
+  if (y == tree->null) {
     tree->root = z;
   } else {
     y->children[(tree->compare(y->key, key) < 0) ? 1 : 0] = z;
@@ -458,12 +460,12 @@ void red_black_tree_remove(struct RedBlackTree* tree, const void* key) {
     abort();
   }
   var z = tree->root;
-  var w = tree->nil;
+  var w = tree->null;
   struct RedBlackTreeNode* y;
   struct RedBlackTreeNode* x;
   struct RedBlackTreeNode* delta;
   enum RedBlackTreeColor old_color;
-  while (z != tree->nil) { /* Find a node z with the specific key. */
+  while (z != tree->null) { /* Find a node z with the specific key. */
     w = z;
     w->size -= 1;
     if (tree->compare(key, z->key) == 0) {
@@ -471,7 +473,7 @@ void red_black_tree_remove(struct RedBlackTree* tree, const void* key) {
     }
     z = z->children[tree->compare(z->key, key) < 0 ? 1 : 0];
   }
-  if (z != tree->nil) {
+  if (z != tree->null) {
     if (z->count > 1) {
       tree->count -= 1;
       z->count -= 1;
@@ -479,10 +481,10 @@ void red_black_tree_remove(struct RedBlackTree* tree, const void* key) {
     }
     y = z;
     old_color = y->color;
-    if (z->children[0] == tree->nil) {
+    if (z->children[0] == tree->null) {
       x = z->children[1];
       _red_black_tree_transplant(tree, z, z->children[1]);
-    } else if (z->children[1] == tree->nil) {
+    } else if (z->children[1] == tree->null) {
       x = z->children[0];
       _red_black_tree_transplant(tree, z, z->children[0]);
     } else {
@@ -516,7 +518,7 @@ void red_black_tree_remove(struct RedBlackTree* tree, const void* key) {
     tree->is_empty = tree->count == 0 ? true : false;
     return;
   } else { /* No such keys, restore subtree sizes */
-    while (w != tree->nil) {
+    while (w != tree->null) {
       w->size += 1;
       w = w->p;
     }
@@ -549,8 +551,8 @@ void red_black_tree_successor(
   void* result
 ) {
   var current = tree->root;
-  var successor = tree->nil;
-  while (current != tree->nil) {
+  var successor = tree->null;
+  while (current != tree->null) {
     if (tree->compare(current->key, key) > 0) {
       successor = current;
       current = current->children[0];
@@ -568,8 +570,8 @@ void red_black_tree_predecessor(
   void* result
 ) {
   var current = tree->root;
-  var predecessor = tree->nil;
-  while (current != tree->nil) {
+  var predecessor = tree->null;
+  while (current != tree->null) {
     if (tree->compare(current->key, key) < 0) {
       predecessor = current;
       current = current->children[1];
@@ -588,7 +590,7 @@ Int64 red_black_tree_rank(struct RedBlackTree* tree, void* key) {
   var x = tree->root;
   var rank = 0 + 1; /* Start at one */
   
-  while (x != tree->nil) {
+  while (x != tree->null) {
     if (tree->compare(x->key, key) < 0) {
       rank += x->children[0]->size + x->count;
       x = x->children[1];
@@ -599,15 +601,16 @@ Int64 red_black_tree_rank(struct RedBlackTree* tree, void* key) {
   return rank;
 }
 
-/* Returns the i-th smallest key in a tree */
+/* Returns the i-th smallest key in a tree. (Zero-based numbering) */
 void red_black_tree_select(struct RedBlackTree* tree, Int64 i, void* result) {
-  if (i < 1 || i > tree->count) {
+  if (i < 1 - 1 || i > tree->count - 1) {
     fprintf(stderr, RBT_FATAL_ERR_INDOB);
     abort();
   }
   
+  i += 1;
   var x = tree->root;
-  while (x != tree->nil) {
+  while (x != tree->null) {
     if (x->children[0]->size + 1 <= i &&
         x->children[0]->size + x->count >= i) {
       memcpy(result, x->key, tree->_width);
@@ -623,12 +626,13 @@ void red_black_tree_select(struct RedBlackTree* tree, Int64 i, void* result) {
   }
 }
 
-/* Returns a Boolean value indicating whether the tree contains the given
+/* 
+ * Returns a Boolean value indicating whether the tree contains the given
  * element.
  */
 Bool red_black_tree_contains(struct RedBlackTree* tree, void* key) {
   var x = tree->root;
-  while (x != tree->nil) { /* Find the node with key */
+  while (x != tree->null) { /* Find the node with key */
     if (tree->compare(x->key, key) == 0) {
       return true;
     }
