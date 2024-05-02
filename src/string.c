@@ -339,11 +339,7 @@ void string_c_string(struct String* string, char* result) {
  * Returns an integer greater than, equal to, or less than 0, according as the
  * string lhs is greater than, equal to, or less than the string rhs.
  */
-Int32 string_compare_ascii(const void* lhs, const void* rhs) {
-  if (lhs == rhs) {
-    return 0;  // Equal pointers, return 0
-  }
-  
+Int32 string_compare_ascii(const void* lhs, const void* rhs) {  
   var a = *(struct String**)lhs;
   var b = *(struct String**)rhs;
   

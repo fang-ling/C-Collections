@@ -44,7 +44,7 @@
   for (var i = 0; i < 5; i += 1) {
     struct String* string;
     red_black_tree_select(tree, i, &string);
-    XCTAssertEqual(string_compare_ascii(input[i], string), 0);
+    XCTAssertEqual(string_compare_ascii(&input[i], &string), 0);
   }
   
   /* duplicates */
@@ -62,7 +62,7 @@
   for (var i = 0; i < tree->count; i += 1) {
     struct String* string;
     red_black_tree_select(tree, i, &string);
-    XCTAssertEqual(string_compare_ascii(input[i], string), 0);
+    XCTAssertEqual(string_compare_ascii(&input[i], &string), 0);
   }
   
   for (var i = 0; i < 5; i += 1) {

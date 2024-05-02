@@ -124,7 +124,7 @@
   for (var i = 0; i < 5; i += 1) {
     struct String* string;
     array_get(array, i, &string);
-    XCTAssertEqual(string_compare_ascii(string, input[i]), 0);
+    XCTAssertEqual(string_compare_ascii(&string, &input[i]), 0);
   }
   
   array_deinit(array);
